@@ -1,0 +1,123 @@
+{
+ "title": "Sign in - KYC Desk",
+ "headings": [
+  {
+   "level": 1,
+   "text": "KYC Onboarding Desk"
+  }
+ ],
+ "elements": [
+  {
+   "kind": "input",
+   "tag": "input",
+   "role": "textbox",
+   "type": "text",
+   "id": "u",
+   "name_attr": "",
+   "placeholder": "",
+   "aria_label": "",
+   "title": "",
+   "href": "",
+   "testid": "",
+   "required": false,
+   "disabled": false,
+   "pattern": "",
+   "min": "",
+   "max": "",
+   "maxlength": "",
+   "handlers": {},
+   "form": "",
+   "text": "",
+   "label": "Username",
+   "line": 0,
+   "options": [],
+   "visible": true,
+   "eid": "e1",
+   "name": "Username",
+   "locator": "page.get_by_label(\"Username\")"
+  },
+  {
+   "kind": "input",
+   "tag": "input",
+   "role": "textbox",
+   "type": "password",
+   "id": "p",
+   "name_attr": "",
+   "placeholder": "",
+   "aria_label": "",
+   "title": "",
+   "href": "",
+   "testid": "",
+   "required": false,
+   "disabled": false,
+   "pattern": "",
+   "min": "",
+   "max": "",
+   "maxlength": "",
+   "handlers": {},
+   "form": "",
+   "text": "",
+   "label": "Password",
+   "line": 0,
+   "options": [],
+   "visible": true,
+   "eid": "e2",
+   "name": "Password",
+   "locator": "page.get_by_label(\"Password\")"
+  },
+  {
+   "kind": "button",
+   "tag": "button",
+   "role": "button",
+   "type": "",
+   "id": "",
+   "name_attr": "",
+   "placeholder": "",
+   "aria_label": "",
+   "title": "",
+   "href": "",
+   "testid": "",
+   "required": false,
+   "disabled": false,
+   "pattern": "",
+   "min": "",
+   "max": "",
+   "maxlength": "",
+   "handlers": {
+    "onclick": "doLogin()"
+   },
+   "form": "",
+   "text": "Sign in",
+   "label": "",
+   "line": 0,
+   "options": [],
+   "visible": true,
+   "eid": "e3",
+   "name": "Sign in",
+   "locator": "page.get_by_role(\"button\", name=\"Sign in\")"
+  }
+ ],
+ "forms": [],
+ "tables": [],
+ "scripts": [
+  "js/auth.js"
+ ],
+ "id": "login",
+ "state": "",
+ "source": "",
+ "url": "http://127.0.0.1:53251/login.html",
+ "viewport": {
+  "width": 1280,
+  "height": 800
+ },
+ "screenshot": "screens/login.png",
+ "inline_script_count": 0,
+ "rendered_by_script": false,
+ "script_navigation": [],
+ "browser_storage_keys": [],
+ "network": [],
+ "console_errors": [
+  "Failed to load resource: the server responded with a status of 404 (File not found)"
+ ],
+ "mode": "live"
+}

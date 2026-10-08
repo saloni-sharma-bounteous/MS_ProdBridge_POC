@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Project mindmap</title>
+<style>
+:root{--bg:#f5f6f3;--ink:#1b2430;--mut:#5b6672;--line:#c9cfd4;--pane:#ffffff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",system-ui,sans-serif}
+header{padding:28px 40px 4px;max-width:1500px;margin:0 auto}
+h1{font-size:30px;margin:0 0 4px;letter-spacing:-.2px}
+#summary{margin:0;color:var(--mut);max-width:80ch}
+main{max-width:1700px;margin:0 auto;padding:8px 24px;display:flex;gap:16px;align-items:flex-start}
+#mapwrap{flex:1;min-width:0}
+svg{width:100%;height:auto;display:block}
+.previewable{cursor:pointer}.previewable:focus{outline:none}.previewable:focus-visible rect{stroke-width:4}
+.badge path{fill:#fff}
+.selected rect{stroke-width:4;filter:drop-shadow(0 2px 6px rgba(0,0,0,.25))}
+#preview{display:none;flex:0 0 46%;position:sticky;top:12px;height:calc(100vh - 24px);background:var(--pane);border:1px solid var(--line);border-radius:8px;overflow:hidden;flex-direction:column}
+body.has-preview #preview{display:flex}
+.phead{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.phead code{font-size:12.5px;color:var(--mut);margin-left:6px}.sp{flex:1}
+.pbtn{font:inherit;font-size:13px;padding:5px 12px;border:1px solid var(--line);background:#fff;border-radius:4px;cursor:pointer;color:var(--ink);text-decoration:none}
+.pbtn:hover{background:#eef1f3}
+#pframe{flex:1;width:100%;border:0;background:#fff}
+.phint{margin:0;padding:6px 14px;font-size:12.5px;color:var(--mut);border-top:1px solid var(--line)}
+.item .pbtn{margin-top:6px}
+.edge{fill:none;stroke-width:2;opacity:.55}
+.link{fill:none;stroke:#46515c;stroke-width:1.6;stroke-dasharray:6 4}
+.link-label{font-size:11.5px;fill:#2f3944;paint-order:stroke;stroke:var(--bg);stroke-width:4px;stroke-linejoin:round;text-anchor:middle}
+.node rect{stroke-width:2}
+.n1{font-size:14px;font-weight:600}.n2{font-size:11.5px}
+.root rect{fill:var(--ink);stroke:var(--ink)}.root .n1{font-size:20px;fill:#fff}
+.branch .n1{font-size:16px;fill:#fff}
+.leaf rect{fill:var(--pane)}.leaf .n1{fill:var(--ink)}.leaf .n2{fill:var(--mut)}
+.node{cursor:default;transition:opacity .15s}.dim{opacity:.12}
+section{max-width:1500px;margin:0 auto;padding:8px 40px 32px}
+h2{font-size:20px;margin:20px 0 10px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px}
+.card{background:var(--pane);border:1px solid var(--line);border-left-width:6px;border-radius:6px;padding:14px 18px}
+.card h3{margin:0 0 2px;font-size:17px}.card p.s{margin:0 0 10px;color:var(--mut)}
+.item{padding:8px 0;border-top:1px solid #e6e9ec}.item b{font-size:14.5px}
+.item code{font-size:12.5px;color:var(--mut);margin-left:6px}.item div{color:#303a45;font-size:14px}
+ol{margin:0;padding-left:22px;max-width:100ch}ol li{margin:4px 0}
+.legend{color:var(--mut);font-size:13px;display:flex;gap:22px;align-items:center;padding:0 40px 8px;max-width:1500px;margin:0 auto}
+.legend i{display:inline-block;width:34px;border-top:2px solid #46515c;vertical-align:middle;margin-right:6px}
+.legend i.d{border-top-style:dashed}
+</style>
+</head>
+<body>
+<header><h1 id="title"></h1><p id="summary"></p></header>
+<div class="legend"><span><i></i>belongs to a group</span><span><i class="d"></i>talks to / depends on</span><span>Hover a box to highlight its connections</span><span>Click a box with a play badge to preview that page here</span></div>
+<main>
+<div id="mapwrap"><svg id="map" role="img" aria-label="Project mindmap"></svg></div>
+<aside id="preview" aria-label="Page preview">
+  <div class="phead"><div><b id="ptitle"></b><code id="ppath"></code></div><span class="sp"></span>
+    <a class="pbtn" id="popen" target="_blank" rel="noopener">Open in new tab</a><button class="pbtn" id="pclose" type="button">Close</button></div>
+  <iframe id="pframe" title="Page preview" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+  <p class="phint">Blank page? Some pages need their server running or block embedding. Use Open in new tab.</p>
+</aside>
+</main>
+<section id="flowbox" hidden><h2>How it works end to end</h2><ol id="flow"></ol></section>
+<section><h2>Components</h2><div class="cards" id="cards"></div></section>
+<script>
+const DATA = /*DATA*/null;
+(function () {
+  const NS = 'http://www.w3.org/2000/svg';
+  const COLORS = ['#0e5a58', '#b4532a', '#3d4f9c', '#8a6d1a', '#7a3b6e', '#2f7a3e', '#a53a2c', '#2d6a8a'];
+  const svg = document.getElementById('map');
+  const el = (tag, attrs, parent) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  };
+
+  document.getElementById('title').textContent = DATA.title;
+  document.getElementById('summary').textContent = DATA.summary || '';
+  document.title = DATA.title + ' - mindmap';
+
+  // ----- page preview -----
+  const BASE = DATA.previewBase == null ? '../' : DATA.previewBase;   // mindmap/ sits one level below the project root
+  function previewOf(c) {
+    const p = c.preview || (/\.html?$/i.test(c.path || '') ? c.path : '');
+    if (!p) return null;
+    const url = /^https?:\/\//i.test(p) ? p : BASE + p.replace(/\\/g, '/').replace(/^\.?\//, '');
+    return { url: encodeURI(url), title: c.name, path: p };
+  }
+  function openPreview(pv, id) {
+    // Optional: seed a session so login-protected pages load instead of redirecting to login.
+    // JSON: "previewSession": { "key": "user", "value": { ... } } (stored in sessionStorage)
+    if (DATA.previewSession && DATA.previewSession.key) {
+      try { sessionStorage.setItem(DATA.previewSession.key, JSON.stringify(DATA.previewSession.value)); } catch (e) {}
+    }
+    document.getElementById('pframe').src = pv.url;
+    document.getElementById('ptitle').textContent = pv.title;
+    document.getElementById('ppath').textContent = pv.path;
+    document.getElementById('popen').href = pv.url;
+    document.body.classList.add('has-preview');
+    gNodes.querySelectorAll('.selected').forEach(n => n.classList.remove('selected'));
+    const g = gNodes.querySelector(`[data-id="${id}"]`);
+    if (g) g.classList.add('selected');
+  }
+  function closePreview() {
+    document.body.classList.remove('has-preview');
+    document.getElementById('pframe').src = 'about:blank';
+    gNodes.querySelectorAll('.selected').forEach(n => n.classList.remove('selected'));
+  }
+  document.getElementById('pclose').addEventListener('click', closePreview);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closePreview(); });
+
+  // ----- layout (radial) -----
+  const branches = DATA.branches;
+  const weights = branches.map(b => Math.max(1, (b.children || []).length));
+  const total = weights.reduce((a, b) => a + b, 0);
+  const R1 = 230, R2 = Math.max(430, total * 12);
+  const defs = el('defs', {}, svg);
+  const gEdges = el('g', {}, svg), gLinks = el('g', {}, svg), gNodes = el('g', {}, svg), gLabels = el('g', {}, svg);
+
+  const nodes = {};      // id -> {x,y,w,h}
+  const edges = [];      // {a,b,els}
+  const nbrs = {};       // id -> Set
+  const link = (a, b) => { (nbrs[a] = nbrs[a] || new Set()).add(b); (nbrs[b] = nbrs[b] || new Set()).add(a); };
+
+  function makeNode(id, name, role, x, y, cls, color, pv) {
+    const g = el('g', { class: 'node ' + cls, 'data-id': id, transform: `translate(${x},${y})` }, gNodes);
+    const rect = el('rect', {}, g);
+    const t1 = el('text', { class: 'n1', 'text-anchor': 'middle' }, g); t1.textContent = name;
+    let t2 = null;
+    if (role) { t2 = el('text', { class: 'n2', 'text-anchor': 'middle' }, g); t2.textContent = role; }
+    const w = Math.max(t1.getComputedTextLength(), t2 ? t2.getComputedTextLength() : 0) + 28;
+    const h = cls === 'root' ? 58 : t2 ? 48 : 36;
+    t1.setAttribute('y', t2 ? -5 : 5);
+    if (t2) t2.setAttribute('y', 14);
+    rect.setAttribute('x', -w / 2); rect.setAttribute('y', -h / 2);
+    rect.setAttribute('width', w); rect.setAttribute('height', h);
+    rect.setAttribute('rx', cls === 'branch' ? h / 2 : 8);
+    if (cls === 'branch') { rect.setAttribute('fill', color); rect.setAttribute('stroke', color); }
+    if (cls === 'leaf') rect.setAttribute('stroke', color);
+    nodes[id] = { x, y, w, h };
+    if (pv) {
+      g.classList.add('previewable');
+      g.setAttribute('tabindex', '0'); g.setAttribute('role', 'button'); g.setAttribute('aria-label', 'Preview ' + name);
+      const bd = el('g', { class: 'badge', transform: `translate(${w / 2 - 4},${-h / 2 + 4})` }, g);
+      el('circle', { r: 10, fill: color }, bd);
+      el('path', { d: 'M-3,-5 L5,0 L-3,5 z' }, bd);
+      g.addEventListener('click', () => openPreview(pv, id));
+      g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPreview(pv, id); } });
+    }
+    return g;
+  }
+
+  const rootNodeG = makeNode('__root', DATA.title, '', 0, 0, 'root', '#1b2430');
+  let ang = -Math.PI / 2;
+  branches.forEach((b, i) => {
+    const color = COLORS[i % COLORS.length];
+    const span = 2 * Math.PI * weights[i] / total;
+    const mid = ang + span / 2;
+    const bid = 'b' + i;
+    makeNode(bid, b.name, '', R1 * Math.cos(mid), R1 * Math.sin(mid), 'branch', color);
+    edges.push({ a: '__root', b: bid, color });
+    link('__root', bid);
+    const kids = b.children || [];
+    kids.forEach((c, j) => {
+      const a = ang + span * (j + 0.5) / kids.length;
+      const r = R2 + (kids.length > 3 ? (j % 2) * 105 : 0);
+      c._id = c.id || `${bid}c${j}`;
+      makeNode(c._id, c.name, c.role || '', r * Math.cos(a), r * Math.sin(a), 'leaf', color, previewOf(c));
+      edges.push({ a: bid, b: c._id, color });
+      link(bid, c._id);
+    });
+    ang += span;
+  });
+
+  // ----- tree edges -----
+  edges.forEach(e => {
+    const p = nodes[e.a], c = nodes[e.b], mx = (p.x + c.x) / 2;
+    e.el = el('path', { class: 'edge', stroke: e.color, d: `M${p.x},${p.y} C${mx},${p.y} ${mx},${c.y} ${c.x},${c.y}` }, gEdges);
+  });
+
+  // ----- cross links (curve toward the centre so they bundle) -----
+  function edgePoint(n, fx, fy) {
+    const dx = fx - n.x, dy = fy - n.y;
+    const t = Math.min((n.w / 2 + 3) / (Math.abs(dx) || 1e-6), (n.h / 2 + 3) / (Math.abs(dy) || 1e-6));
+    return [n.x + dx * t, n.y + dy * t];
+  }
+  const marker = el('marker', { id: 'arrow', viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 8, markerHeight: 8, orient: 'auto-start-reverse' }, defs);
+  el('path', { d: 'M0,0 L10,5 L0,10 z', fill: '#46515c' }, marker);
+  const linkEls = [];
+  (DATA.links || []).forEach(l => {
+    const a = nodes[l.from], b = nodes[l.to];
+    if (!a || !b) return;
+    // control point: pulled a little toward the centre, then pushed sideways so
+    // the arc never runs through the root box
+    let cx = (a.x + b.x) / 2 * 0.65, cy = (a.y + b.y) / 2 * 0.65;
+    const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1;
+    const minR = 190, r = Math.hypot(cx, cy);
+    if (r < minR) {
+      let px = -dy / len, py = dx / len;                  // perpendicular to a->b
+      if (px * cx + py * cy < 0) { px = -px; py = -py; }  // push away from the centre side we are on
+      const push = minR - r + 30 * (linkEls.length % 3);  // stagger neighbours
+      cx += px * push; cy += py * push;
+    }
+    const [x1, y1] = edgePoint(a, cx, cy), [x2, y2] = edgePoint(b, cx, cy);
+    const path = el('path', { class: 'link', d: `M${x1},${y1} Q${cx},${cy} ${x2},${y2}`, 'marker-end': 'url(#arrow)' }, gLinks);
+    let label = null;
+    if (l.label) {
+      label = el('text', { class: 'link-label', x: 0.25 * x1 + 0.5 * cx + 0.25 * x2, y: 0.25 * y1 + 0.5 * cy + 0.25 * y2 + 4 }, gLabels);
+      label.textContent = l.label;
+    }
+    linkEls.push({ a: l.from, b: l.to, els: [path, label].filter(Boolean) });
+    link(l.from, l.to);
+  });
+
+  // ----- fit the view to the content -----
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  Object.values(nodes).forEach(n => {
+    x0 = Math.min(x0, n.x - n.w / 2); x1 = Math.max(x1, n.x + n.w / 2);
+    y0 = Math.min(y0, n.y - n.h / 2); y1 = Math.max(y1, n.y + n.h / 2);
+  });
+  const pad = 40;
+  svg.setAttribute('viewBox', `${x0 - pad} ${y0 - pad} ${x1 - x0 + 2 * pad} ${y1 - y0 + 2 * pad}`);
+
+  // ----- hover highlight -----
+  const allNodeEls = [...gNodes.children];
+  const treeEls = edges.map(e => ({ a: e.a, b: e.b, els: [e.el] }));
+  function focus(id) {
+    const keep = new Set([id, ...(nbrs[id] || [])]);
+    allNodeEls.forEach(g => g.classList.toggle('dim', !keep.has(g.dataset.id)));
+    [...treeEls, ...linkEls].forEach(e => e.els.forEach(x => x.classList.toggle('dim', !(e.a === id || e.b === id))));
+  }
+  function clear() {
+    allNodeEls.forEach(g => g.classList.remove('dim'));
+    [...treeEls, ...linkEls].forEach(e => e.els.forEach(x => x.classList.remove('dim')));
+  }
+  allNodeEls.forEach(g => { g.addEventListener('mouseenter', () => focus(g.dataset.id)); g.addEventListener('mouseleave', clear); });
+
+  // ----- flow list and component cards -----
+  if ((DATA.flow || []).length) {
+    document.getElementById('flowbox').hidden = false;
+    const ol = document.getElementById('flow');
+    DATA.flow.forEach(s => { const li = document.createElement('li'); li.textContent = s; ol.appendChild(li); });
+  }
+  const cards = document.getElementById('cards');
+  branches.forEach((b, i) => {
+    const card = document.createElement('div');
+    card.className = 'card'; card.style.borderLeftColor = COLORS[i % COLORS.length];
+    const h = document.createElement('h3'); h.textContent = b.name; card.appendChild(h);
+    const s = document.createElement('p'); s.className = 's'; s.textContent = b.summary || ''; card.appendChild(s);
+    (b.children || []).forEach(c => {
+      const it = document.createElement('div'); it.className = 'item';
+      const n = document.createElement('b'); n.textContent = c.name; it.appendChild(n);
+      if (c.path) { const code = document.createElement('code'); code.textContent = c.path; it.appendChild(code); }
+      const d = document.createElement('div'); d.textContent = c.detail || c.role || ''; it.appendChild(d);
+      const pv = previewOf(c);
+      if (pv) {
+        const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'pbtn'; btn.textContent = 'Preview page';
+        btn.addEventListener('click', () => { openPreview(pv, c._id); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+        it.appendChild(btn);
+      }
+      card.appendChild(it);
+    });
+    cards.appendChild(card);
+  });
+})();
+</script>
+</body>
+</html>

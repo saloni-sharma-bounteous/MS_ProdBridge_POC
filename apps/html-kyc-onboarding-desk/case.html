@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Case - KYC Desk</title>
+<link rel="stylesheet" href="css/style.css"></head>
+<body>
+<div id="nav"></div>
+<main>
+  <div id="content"></div>
+</main>
+<script src="js/auth.js"></script><script src="js/store.js"></script><script src="js/nav.js"></script>
+<script>
+  requireLogin(); renderNav();
+  var id = new URLSearchParams(location.search).get("id");
+  var c = getCase(id);
+
+  // recalculate risk on the case page so it is always current
+  function recalcRisk(c) {
+    var pts = 0;
+    var hr = ["IR", "KP", "SY", "MM", "AF", "YE", "RU", "VE"];
+    if (hr.indexOf(c.nationality) > -1) pts += 3;
+    if (hr.indexOf(c.residenceCountry) > -1) pts += 3;
+    if (c.isPEP) pts += 3;
+    if (["casino", "money_service", "car_dealer", "jewellery"].indexOf(c.occupation) > -1) pts += 2;
+    if (c.monthlyVolume > 50000) pts += 2; else if (c.monthlyVolume > 10000) pts += 1;
+    if (c.sourceOfFunds === "other" || c.sourceOfFunds === "unknown") pts += 2;
+    if (!c.faceToFace) pts += 1;
+    var rating = pts >= 7 ? "High" : pts >= 4 ? "Medium" : "Low";
+    return { score: pts, rating: rating };
+  }
+
+  function nextReview(rating) {
+    var years = rating === "High" ? 1 : rating === "Medium" ? 2 : 3;
+    var d = new Date(); d.setFullYear(d.getFullYear() + years);
+    return d.toISOString().substring(0, 10);
+  }
+
+  function decide(status) {
+    var note = prompt("Decision note");
+    updateCase(c.id, { status: status, decisionNote: note, decidedBy: currentUser().name, decidedAt: new Date().toISOString() });
+    location.reload();
+  }
+
+  if (!c) {
+    document.getElementById("content").innerHTML = "<h1>Case " + id + " not found</h1>";
+  } else {
+    var r = recalcRisk(c);
+    var u = currentUser();
+    var pending = c.status === "pending_review" || c.status === "escalated";
+    var canApprove = u.role === "compliance_officer" || u.role === "admin" || (u.role === "senior_analyst" && r.rating !== "High");
+
+    document.getElementById("content").innerHTML =
+      '<h1>' + c.fullName + ' <span class="pill ' + c.status + '">' + c.status + '</span></h1>' +
+      '<div class="grid"><div class="card"><h3>Customer</h3><dl class="kv">' +
+        '<div><dt>Case</dt><dd>' + c.id + '</dd></div><div><dt>Date of birth</dt><dd>' + c.dob + '</dd></div>' +
+        '<div><dt>Nationality / residence</dt><dd>' + c.nationality + ' / ' + c.residenceCountry + '</dd></div>' +
+        '<div><dt>ID</dt><dd>' + c.idType + ' ' + c.idNumber + ' (exp ' + c.idExpiry + ')</dd></div>' +
+        '<div><dt>Occupation</dt><dd>' + c.occupation + '</dd></div><div><dt>Source of funds</dt><dd>' + c.sourceOfFunds + '</dd></div>' +
+        '<div><dt>Monthly volume</dt><dd>$' + c.monthlyVolume.toLocaleString() + '</dd></div></dl></div>' +
+      '<div class="card"><h3>Risk</h3><dl class="kv">' +
+        '<div><dt>Score</dt><dd>' + r.score + '</dd></div><div><dt>Rating</dt><dd><span class="pill ' + r.rating + '">' + r.rating + '</span></dd></div>' +
+        '<div><dt>PEP</dt><dd>' + (c.isPEP ? "Yes" : "No") + '</dd></div>' +
+        '<div><dt>Next review due</dt><dd>' + nextReview(r.rating) + '</dd></div>' +
+        '<div><dt>Created by</dt><dd>' + c.createdBy + '</dd></div></dl></div></div>' +
+      (c.decisionNote ? '<div class="card"><h3>Decision note</h3>' + c.decisionNote + ' <small>(' + c.decidedBy + ')</small></div>' : '') +
+      (pending ? '<div class="card"><h3>Decision</h3>' +
+        (canApprove ? '<button onclick="decide(\'approved\')">Approve</button> ' : '') +
+        '<button class="danger" onclick="decide(\'rejected\')">Reject</button> ' +
+        '<button class="warn" onclick="decide(\'escalated\')">Escalate</button></div>' : '');
+  }
+</script>
+</body></html>

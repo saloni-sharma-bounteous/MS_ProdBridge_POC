@@ -1,0 +1,546 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-10-07T16:50:03Z",
+  "project": {
+    "name": "html-kyc-onboarding-desk",
+    "root_type": "static-multipage",
+    "origin": [],
+    "file_count": 13,
+    "loc": 432
+  },
+  "stack": {
+    "languages": {
+      ".css": 1,
+      ".html": 7,
+      ".js": 5
+    },
+    "frameworks": [
+      "jQuery (CDN)"
+    ],
+    "backend_services": []
+  },
+  "dependencies": {
+    "manifest": null,
+    "runtime": {},
+    "dev": {},
+    "lockfile_present": false
+  },
+  "files": [
+    {
+      "path": "case.html",
+      "bytes": 3735,
+      "sha256": "ea6ed9d156e64aa2d64bb6c04889315d4f755c5fe2d83d87a5667e6d89f22b43",
+      "lines": 70,
+      "kind": "markup"
+    },
+    {
+      "path": "index.html",
+      "bytes": 2012,
+      "sha256": "f1b47b24579f9432f6613faa337772dc9b0830c92623cdf72411e94f587681e0",
+      "lines": 42,
+      "kind": "markup"
+    },
+    {
+      "path": "login.html",
+      "bytes": 892,
+      "sha256": "119ea0453c8484575c25394d07e76e3014ab95ab7d8ad405c0e438739f85d5c9",
+      "lines": 25,
+      "kind": "markup"
+    },
+    {
+      "path": "new-case.html",
+      "bytes": 3972,
+      "sha256": "0915532aaa4f78ffffaeff8d26d78db1d4b516570a4f971c4b87649aedd9d57c",
+      "lines": 69,
+      "kind": "markup"
+    },
+    {
+      "path": "old-dashboard.html",
+      "bytes": 462,
+      "sha256": "0c8229544fc76fc131b5ceaabb3627c6970e81ef500b9309120a45f92eb4aa8c",
+      "lines": 12,
+      "kind": "markup"
+    },
+    {
+      "path": "reports.html",
+      "bytes": 1917,
+      "sha256": "2caa090265dc175bd8383abdcbb735763fb43f766e36bcbf7e1e9315ff62f0e8",
+      "lines": 41,
+      "kind": "markup"
+    },
+    {
+      "path": "screening.html",
+      "bytes": 935,
+      "sha256": "3d5843b52893ca7434d3d93601e9a1b1dcb8d44a6b6a957ec6f612414609c53c",
+      "lines": 25,
+      "kind": "markup"
+    },
+    {
+      "path": "css/style.css",
+      "bytes": 2187,
+      "sha256": "5a1384e87826270b19af3524c67edce934498e0e53847fec1449cbfc80247165",
+      "lines": 26,
+      "kind": "style"
+    },
+    {
+      "path": "js/auth.js",
+      "bytes": 875,
+      "sha256": "68318d6f41641b3e4564d52e74324be5260a362678eebdfe2de1fb11e4b06999",
+      "lines": 31,
+      "kind": "source"
+    },
+    {
+      "path": "js/nav.js",
+      "bytes": 554,
+      "sha256": "d80555ecad60cac1b64fd50adeb945aac1f6bdbfd58add613d7be47057692a69",
+      "lines": 11,
+      "kind": "source"
+    },
+    {
+      "path": "js/risk.js",
+      "bytes": 900,
+      "sha256": "dd0725151f85b27c59e533a061b11db94ffc379e465fca198e4c7648dbe796c1",
+      "lines": 27,
+      "kind": "source"
+    },
+    {
+      "path": "js/screening.js",
+      "bytes": 505,
+      "sha256": "b44207e4a2ecdeaeb16c399445e33f712baeb9a80e41af2af7733903ae5aa7e3",
+      "lines": 11,
+      "kind": "source"
+    },
+    {
+      "path": "js/store.js",
+      "bytes": 2007,
+      "sha256": "2fd17ba2ee9f333787d1455ca0e40e8db8ae415c91a872f0814bdd88e5cc5512",
+      "lines": 42,
+      "kind": "source"
+    }
+  ],
+  "entry_points": {
+    "html_pages": [
+      {
+        "path": "case.html",
+        "title": "Case - KYC Desk",
+        "scripts": [
+          "js/auth.js",
+          "js/store.js",
+          "js/nav.js"
+        ],
+        "stylesheets": [
+          "css/style.css"
+        ],
+        "inline_script_count": 1
+      },
+      {
+        "path": "index.html",
+        "title": "Queue - KYC Desk",
+        "scripts": [
+          "js/auth.js",
+          "js/store.js",
+          "js/nav.js"
+        ],
+        "stylesheets": [
+          "css/style.css"
+        ],
+        "inline_script_count": 1
+      },
+      {
+        "path": "login.html",
+        "title": "Sign in - KYC Desk",
+        "scripts": [
+          "js/auth.js"
+        ],
+        "stylesheets": [
+          "css/style.css"
+        ],
+        "inline_script_count": 1
+      },
+      {
+        "path": "new-case.html",
+        "title": "New customer - KYC Desk",
+        "scripts": [
+          "js/auth.js",
+          "js/store.js",
+          "js/risk.js",
+          "js/screening.js",
+          "js/nav.js"
+        ],
+        "stylesheets": [
+          "css/style.css"
+        ],
+        "inline_script_count": 1
+      },
+      {
+        "path": "old-dashboard.html",
+        "title": "Old dashboard",
+        "scripts": [],
+        "stylesheets": [],
+        "inline_script_count": 1
+      },
+      {
+        "path": "reports.html",
+        "title": "Reports - KYC Desk",
+        "scripts": [
+          "https://code.jquery.com/jquery-3.6.0.min.js",
+          "js/auth.js",
+          "js/store.js",
+          "js/risk.js",
+          "js/nav.js"
+        ],
+        "stylesheets": [
+          "css/style.css"
+        ],
+        "inline_script_count": 1
+      },
+      {
+        "path": "screening.html",
+        "title": "Screening - KYC Desk",
+        "scripts": [
+          "js/auth.js",
+          "js/screening.js",
+          "js/nav.js"
+        ],
+        "stylesheets": [
+          "css/style.css"
+        ],
+        "inline_script_count": 1
+      }
+    ],
+    "routes": []
+  },
+  "data_model": {
+    "sql_tables": [],
+    "ts_types": [],
+    "supabase_tables_used": []
+  },
+  "integrations": {
+    "http_calls": [],
+    "url_literals": [
+      {
+        "url": "https://sandbox.screening-provider.example.com/v2",
+        "file": "old-dashboard.html",
+        "line": 8,
+        "in_comment": true
+      },
+      {
+        "url": "https://code.jquery.com/jquery-3.6.0.min.js",
+        "file": "reports.html",
+        "line": 4,
+        "in_comment": false
+      }
+    ],
+    "clients": [],
+    "external_scripts": [
+      {
+        "src": "https://code.jquery.com/jquery-3.6.0.min.js",
+        "integrity": false,
+        "file": "reports.html",
+        "line": 4
+      }
+    ]
+  },
+  "storage": {
+    "browser": [
+      {
+        "api": "sessionStorage",
+        "op": "setItem",
+        "key": "user",
+        "file": "js/auth.js",
+        "line": 12
+      },
+      {
+        "api": "sessionStorage",
+        "op": "getItem",
+        "key": "user",
+        "file": "js/auth.js",
+        "line": 20
+      },
+      {
+        "api": "sessionStorage",
+        "op": "clear",
+        "key": "*",
+        "file": "js/auth.js",
+        "line": 29
+      },
+      {
+        "api": "localStorage",
+        "op": "getItem",
+        "key": "kyc_cases",
+        "file": "js/store.js",
+        "line": 3
+      },
+      {
+        "api": "localStorage",
+        "op": "setItem",
+        "key": "kyc_cases",
+        "file": "js/store.js",
+        "line": 4
+      }
+    ]
+  },
+  "env_vars": {
+    "referenced": [],
+    "defined_in": []
+  },
+  "auth_signals": [
+    {
+      "signal": "page-guard",
+      "detail": "requireLogin() on page",
+      "file": "case.html",
+      "line": 11
+    },
+    {
+      "signal": "role-check",
+      "detail": "role === compliance_officer",
+      "file": "case.html",
+      "line": 48
+    },
+    {
+      "signal": "role-check",
+      "detail": "role === admin",
+      "file": "case.html",
+      "line": 48
+    },
+    {
+      "signal": "role-check",
+      "detail": "role === senior_analyst",
+      "file": "case.html",
+      "line": 48
+    },
+    {
+      "signal": "page-guard",
+      "detail": "requireLogin() on page",
+      "file": "index.html",
+      "line": 18
+    },
+    {
+      "signal": "page-guard",
+      "detail": "requireLogin() on page",
+      "file": "new-case.html",
+      "line": 35
+    },
+    {
+      "signal": "page-guard",
+      "detail": "requireLogin() on page",
+      "file": "reports.html",
+      "line": 21
+    },
+    {
+      "signal": "page-guard",
+      "detail": "requireLogin() on page",
+      "file": "screening.html",
+      "line": 16
+    },
+    {
+      "signal": "login-function",
+      "detail": "defines login()",
+      "file": "js/auth.js",
+      "line": 9
+    },
+    {
+      "signal": "role-check",
+      "detail": "role === admin",
+      "file": "js/nav.js",
+      "line": 8
+    }
+  ],
+  "constants": [
+    {
+      "name": "USERS",
+      "file": "js/auth.js",
+      "line": 2,
+      "value_preview": "[ { u: \"analyst1\", p: \"[REDACTED]\", role: \"analyst\" }, { u: \"senior1\", p: \"[REDACTED]\", role: \"senior_analyst\" }, { u: \"compliance1\", p: \"[REDACTED]\", role: \"co"
+    },
+    {
+      "name": "HIGH_RISK_COUNTRIES",
+      "file": "js/risk.js",
+      "line": 1,
+      "value_preview": "[\"IR\", \"KP\", \"SY\", \"MM\", \"AF\", \"YE\"]"
+    },
+    {
+      "name": "CASH_INTENSIVE",
+      "file": "js/risk.js",
+      "line": 2,
+      "value_preview": "[\"casino\", \"money_service\", \"car_dealer\", \"jewellery\"]"
+    },
+    {
+      "name": "SANCTIONS",
+      "file": "js/screening.js",
+      "line": 1,
+      "value_preview": "[\"ivan petrov\", \"kim jong chol\", \"ali reza mohammadi\", \"hassan al-demir\", \"viktor sokolov\"]"
+    },
+    {
+      "name": "PEP_LIST",
+      "file": "js/screening.js",
+      "line": 2,
+      "value_preview": "[\"elena vasquez-ruiz\", \"jean-marc dupuis\", \"adaobi nwosu\"]"
+    },
+    {
+      "name": "DB_KEY",
+      "file": "js/store.js",
+      "line": 1,
+      "value_preview": "\"kyc_cases\""
+    }
+  ],
+  "functions": [
+    {
+      "name": "recalcRisk",
+      "file": "case.html",
+      "line": 16
+    },
+    {
+      "name": "nextReview",
+      "file": "case.html",
+      "line": 30
+    },
+    {
+      "name": "decide",
+      "file": "case.html",
+      "line": 36
+    },
+    {
+      "name": "quickApprove",
+      "file": "index.html",
+      "line": 20
+    },
+    {
+      "name": "doLogin",
+      "file": "login.html",
+      "line": 17
+    },
+    {
+      "name": "v",
+      "file": "new-case.html",
+      "line": 36
+    },
+    {
+      "name": "submitCase",
+      "file": "new-case.html",
+      "line": 38
+    },
+    {
+      "name": "filtered",
+      "file": "reports.html",
+      "line": 22
+    },
+    {
+      "name": "draw",
+      "file": "reports.html",
+      "line": 26
+    },
+    {
+      "name": "exportCsv",
+      "file": "reports.html",
+      "line": 32
+    },
+    {
+      "name": "runScreen",
+      "file": "screening.html",
+      "line": 17
+    },
+    {
+      "name": "login",
+      "file": "js/auth.js",
+      "line": 9
+    },
+    {
+      "name": "currentUser",
+      "file": "js/auth.js",
+      "line": 19
+    },
+    {
+      "name": "requireLogin",
+      "file": "js/auth.js",
+      "line": 24
+    },
+    {
+      "name": "logout",
+      "file": "js/auth.js",
+      "line": 28
+    },
+    {
+      "name": "renderNav",
+      "file": "js/nav.js",
+      "line": 1
+    },
+    {
+      "name": "scoreCase",
+      "file": "js/risk.js",
+      "line": 4
+    },
+    {
+      "name": "ratingFromScore",
+      "file": "js/risk.js",
+      "line": 17
+    },
+    {
+      "name": "approverFor",
+      "file": "js/risk.js",
+      "line": 23
+    },
+    {
+      "name": "screenName",
+      "file": "js/screening.js",
+      "line": 5
+    },
+    {
+      "name": "getCases",
+      "file": "js/store.js",
+      "line": 3
+    },
+    {
+      "name": "saveCases",
+      "file": "js/store.js",
+      "line": 4
+    },
+    {
+      "name": "addCase",
+      "file": "js/store.js",
+      "line": 6
+    },
+    {
+      "name": "getCase",
+      "file": "js/store.js",
+      "line": 16
+    },
+    {
+      "name": "updateCase",
+      "file": "js/store.js",
+      "line": 20
+    },
+    {
+      "name": "seedIfEmpty",
+      "file": "js/store.js",
+      "line": 26
+    }
+  ],
+  "comments": [
+    {
+      "tag": "TODO",
+      "text": "replace with SSO later",
+      "file": "js/auth.js",
+      "line": 1
+    }
+  ],
+  "legacy_candidates": [
+    "old-dashboard.html"
+  ],
+  "summary": {
+    "html_pages": 7,
+    "routes": 0,
+    "sql_tables": 0,
+    "ts_types": 0,
+    "http_calls": 0,
+    "external_scripts": 1,
+    "browser_storage_keys": 3,
+    "env_vars_referenced": 0,
+    "env_files": 0,
+    "auth_signals": 10,
+    "constants": 6,
+    "functions": 26,
+    "todo_comments": 1,
+    "lockfile_present": false
+  }
+}

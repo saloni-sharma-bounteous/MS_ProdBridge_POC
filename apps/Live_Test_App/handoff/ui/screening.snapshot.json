@@ -1,0 +1,94 @@
+{
+ "id": "screening",
+ "source": "screening.html",
+ "url": "",
+ "title": "Screening - KYC Desk",
+ "viewport": null,
+ "screenshot": "",
+ "headings": [
+  {
+   "level": 1,
+   "text": "Name screening"
+  }
+ ],
+ "elements": [
+  {
+   "kind": "input",
+   "tag": "input",
+   "role": "textbox",
+   "type": "text",
+   "id": "q",
+   "name_attr": "",
+   "placeholder": "Full name",
+   "aria_label": "",
+   "title": "",
+   "href": "",
+   "testid": "",
+   "required": false,
+   "disabled": false,
+   "pattern": "",
+   "min": "",
+   "max": "",
+   "maxlength": "",
+   "handlers": {},
+   "form": "",
+   "text": "",
+   "label": "Name to check",
+   "line": 9,
+   "options": [],
+   "name": "Name to check",
+   "locator": "page.get_by_label(\"Name to check\")",
+   "visible": true,
+   "eid": "e1"
+  },
+  {
+   "kind": "button",
+   "tag": "button",
+   "role": "button",
+   "type": "button",
+   "id": "",
+   "name_attr": "",
+   "placeholder": "",
+   "aria_label": "",
+   "title": "",
+   "href": "",
+   "testid": "",
+   "required": false,
+   "disabled": false,
+   "pattern": "",
+   "min": "",
+   "max": "",
+   "maxlength": "",
+   "handlers": {
+    "onclick": "runScreen()"
+   },
+   "form": "",
+   "text": "Screen",
+   "label": "",
+   "line": 10,
+   "options": [],
+   "name": "Screen",
+   "locator": "page.get_by_role(\"button\", name=\"Screen\")",
+   "visible": true,
+   "eid": "e2"
+  }
+ ],
+ "forms": [],
+ "tables": [],
+ "scripts": [
+  "js/auth.js",
+  "js/screening.js",
+  "js/nav.js"
+ ],
+ "inline_script_count": 1,
+ "rendered_by_script": true,
+ "script_navigation": [
+  "login.html"
+ ],
+ "network": [],
+ "browser_storage_keys": [
+  "user"
+ ],
+ "console_errors": [],
+ "mode": "static"
+}

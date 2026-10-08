@@ -1,0 +1,26 @@
+:root { --ink:#0e2a2f; --accent:#1f6f78; --bg:#f2f5f6; --warn:#e5a823; --bad:#c8402f; --ok:#2e7d4f; }
+* { box-sizing: border-box; }
+body { margin:0; font-family:"Segoe UI",Tahoma,sans-serif; background:var(--bg); color:#1b2a2d; }
+#nav { background:var(--ink); color:#fff; display:flex; align-items:center; gap:22px; padding:12px 28px; }
+#nav a { color:#cfe3e5; text-decoration:none; font-size:14px; }
+#nav a:hover { color:#fff; }
+#nav .brand { font-weight:600; font-size:17px; color:#fff; margin-right:12px; }
+#nav .who { margin-left:auto; font-size:13px; opacity:.8; }
+main { max-width:1040px; margin:24px auto; padding:0 18px; }
+h1 { font-size:22px; margin:0 0 16px; }
+.card { background:#fff; border-radius:6px; padding:18px; margin-bottom:18px; border:1px solid #dde4e6; }
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; }
+.stat b { display:block; font-size:26px; }
+label { display:block; font-size:13px; color:#4b5d61; margin-bottom:10px; }
+input,select,textarea { width:100%; padding:8px; margin-top:4px; border:1px solid #b9c6c9; border-radius:4px; font:inherit; }
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:0 18px; }
+button,.btn { background:var(--accent); color:#fff; border:0; border-radius:4px; padding:8px 16px; cursor:pointer; font:inherit; text-decoration:none; display:inline-block; }
+button.danger { background:var(--bad); } button.warn { background:var(--warn); color:#222; } button.ghost { background:#fff; color:var(--accent); border:1px solid var(--accent); }
+table { width:100%; border-collapse:collapse; font-size:14px; }
+th,td { text-align:left; padding:8px 6px; border-bottom:1px solid #e4eaec; }
+.pill { padding:2px 9px; border-radius:10px; font-size:12px; background:#e4eaec; }
+.pill.High { background:#f6d3cd; } .pill.Medium { background:#faedc6; } .pill.Low { background:#d3ecdc; }
+.pill.blocked,.pill.rejected { background:#f6d3cd; } .pill.approved { background:#d3ecdc; }
+.msg { margin-top:10px; font-size:14px; } .msg.err { color:var(--bad); }
+dl.kv div { display:flex; justify-content:space-between; border-bottom:1px solid #eef2f3; padding:6px 0; font-size:14px; }
+dl.kv dt { color:#5d7074; }

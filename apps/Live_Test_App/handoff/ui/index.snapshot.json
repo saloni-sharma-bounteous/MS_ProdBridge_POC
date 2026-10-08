@@ -1,0 +1,45 @@
+{
+ "id": "index",
+ "source": "index.html",
+ "url": "",
+ "title": "Queue - KYC Desk",
+ "viewport": null,
+ "screenshot": "",
+ "headings": [
+  {
+   "level": 1,
+   "text": "Review queue"
+  }
+ ],
+ "elements": [],
+ "forms": [],
+ "tables": [
+  {
+   "id": "table-1",
+   "headers": [
+    "Case",
+    "Customer",
+    "Rating",
+    "Status",
+    "Created"
+   ],
+   "line": 10
+  }
+ ],
+ "scripts": [
+  "js/auth.js",
+  "js/store.js",
+  "js/nav.js"
+ ],
+ "inline_script_count": 1,
+ "rendered_by_script": true,
+ "script_navigation": [
+  "login.html"
+ ],
+ "network": [],
+ "browser_storage_keys": [
+  "user"
+ ],
+ "console_errors": [],
+ "mode": "static"
+}

@@ -1,0 +1,635 @@
+{
+  "app": {
+    "name": "KYC Onboarding Desk"
+  },
+  "epics": [
+    {
+      "id": "E-00",
+      "title": "Decisions needed",
+      "goal": "Get named owners to answer the open questions so blocked stories can proceed; no owner has been named or has answered yet. Story set approved by Saloni Sharma.",
+      "stories": [
+        {
+          "id": "S-001",
+          "title": "Decide the risk rule set and owner",
+          "description": "As the compliance owner I decide which risk scoring rules, country list and rating thresholds apply, and who maintains them, so that one rule set is built.",
+          "priority": "P0",
+          "effort": "S",
+          "type": "tech",
+          "acceptance_criteria": [
+            "Given the scoring module and the case page disagree (High at 6 vs 7, different country lists) When the owner reviews both Then one rule set with points, thresholds and country list is recorded in the spec as BR-001 to BR-003.",
+            "Given the decision is not made When engineering plans the scoring stories Then those stories stay blocked and no thresholds are guessed."
+          ],
+          "depends_on": [],
+          "requirement_refs": [
+            "Q-001"
+          ],
+          "labels": [
+            "needs-decision",
+            "blocked"
+          ]
+        },
+        {
+          "id": "S-002",
+          "title": "Decide approval policy and Quick approve",
+          "description": "As the compliance owner I decide whether Low-risk cases auto-approve, whether Quick approve exists, who may reject or escalate, and whether four-eyes applies, so that decision permissions are defined.",
+          "priority": "P0",
+          "effort": "S",
+          "type": "tech",
+          "acceptance_criteria": [
+            "Given the queue has a Quick approve that skips role and risk checks When the owner decides Then the spec records keep or remove, and the approval matrix and four-eyes rule for BR-004 and BR-010.",
+            "Given Q-002 is unanswered When routing stories are planned Then they remain blocked and no auto-approval is built."
+          ],
+          "depends_on": [],
+          "requirement_refs": [
+            "Q-002",
+            "Q-003"
+          ],
+          "labels": [
+            "needs-decision",
+            "blocked"
+          ]
+        },
+        {
+          "id": "S-003",
+          "title": "Decide blocked-case handling and review cycle",
+          "description": "As the compliance officer I decide what happens to sanctions-blocked cases and how the review cycle (1, 2, 3 years) is used, so that these flows are specified.",
+          "priority": "P1",
+          "effort": "S",
+          "type": "tech",
+          "acceptance_criteria": [
+            "Given a case is blocked When the officer decides Then the spec states who reviews, releases or reports it.",
+            "Given the review cycle is confirmed or changed When the spec is updated Then BR-007 and whether reminders are needed are stated."
+          ],
+          "depends_on": [],
+          "requirement_refs": [
+            "Q-004",
+            "Q-005"
+          ],
+          "labels": [
+            "needs-decision",
+            "blocked"
+          ]
+        },
+        {
+          "id": "S-004",
+          "title": "Decide screening provider and identity provider",
+          "description": "As the tech lead I choose the sanctions/PEP provider with its matching logic and the identity provider with its role mapping, so that integrations can be built.",
+          "priority": "P0",
+          "effort": "S",
+          "type": "tech",
+          "acceptance_criteria": [
+            "Given no provider is chosen When the tech lead decides Then IN-001 and IN-002 name the systems, matching method and role mapping.",
+            "Given a provider is unavailable When the decision is recorded Then the failure behaviour (hold, never treat as no match) is confirmed."
+          ],
+          "depends_on": [],
+          "requirement_refs": [
+            "Q-006",
+            "Q-007"
+          ],
+          "labels": [
+            "needs-decision",
+            "blocked"
+          ]
+        },
+        {
+          "id": "S-005",
+          "title": "Decide data, access and operations policy",
+          "description": "As the business owner I decide required fields and formats, admin powers, report and export access, retention, ID re-check, jurisdictions, availability and the legacy page, so that data and access rules are fixed.",
+          "priority": "P1",
+          "effort": "S",
+          "type": "tech",
+          "acceptance_criteria": [
+            "Given these questions are open When the owner answers them Then Q-008 to Q-014 are closed in the spec with named owners.",
+            "Given an answer is missing When dependent stories are planned Then they stay blocked."
+          ],
+          "depends_on": [],
+          "requirement_refs": [
+            "Q-008",
+            "Q-009",
+            "Q-010",
+            "Q-011",
+            "Q-012",
+            "Q-013",
+            "Q-014"
+          ],
+          "labels": [
+            "needs-decision",
+            "blocked"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E-01",
+      "title": "Foundations",
+      "goal": "A deployable service skeleton and database schema for the stories to build on.",
+      "stories": [
+        {
+          "id": "S-006",
+          "title": "Service skeleton, CI and secrets handling",
+          "description": "As an engineer I have a service skeleton with build, tests and secret-store configuration so that features can be built safely.",
+          "priority": "P0",
+          "effort": "M",
+          "type": "tech",
+          "acceptance_criteria": [
+            "Given the repository When CI runs Then build and tests pass.",
+            "Given the source code When it is scanned Then no credential or token is present, and missing secrets cause startup failure rather than defaults."
+          ],
+          "depends_on": [],
+          "requirement_refs": [
+            "NF-001"
+          ],
+          "labels": []
+        },
+        {
+          "id": "S-007",
+          "title": "Database schema for cases, audit, screening, rules and users",
+          "description": "As an engineer I have the schema for DM-001 to DM-005 so that features can store data.",
+          "priority": "P0",
+          "effort": "M",
+          "type": "data",
+          "acceptance_criteria": [
+            "Given an empty database When migrations run Then all tables exist with keys and constraints.",
+            "Given a migration is run twice When it is re-applied Then it is a no-op without error."
+          ],
+          "depends_on": [
+            "S-006"
+          ],
+          "requirement_refs": [
+            "DM-001",
+            "DM-002",
+            "DM-003",
+            "DM-004",
+            "DM-005"
+          ],
+          "labels": [
+            "needs-data-model"
+          ]
+        },
+        {
+          "id": "S-008",
+          "title": "Consistent error handling",
+          "description": "As a user I see a plain message when something fails and no data changes so that I can retry safely.",
+          "priority": "P1",
+          "effort": "S",
+          "type": "feature",
+          "acceptance_criteria": [
+            "Given a save fails midway When the error is returned Then the user sees a plain message and no partial case exists.",
+            "Given an unexpected server error When it occurs Then no personal data appears in the message or logs."
+          ],
+          "depends_on": [
+            "S-006"
+          ],
+          "requirement_refs": [
+            "FR-015",
+            "NF-003"
+          ],
+          "labels": []
+        }
+      ]
+    },
+    {
+      "id": "E-02",
+      "title": "Security and audit",
+      "goal": "Authenticated access, server-side authorisation, and a complete audit trail.",
+      "stories": [
+        {
+          "id": "S-009",
+          "title": "Sign in with the identity provider",
+          "description": "As a user I sign in via the organisation's identity provider so that only staff access the app.",
+          "priority": "P0",
+          "effort": "M",
+          "type": "security",
+          "acceptance_criteria": [
+            "Given I am not signed in When I open any page or API Then I am sent to sign in and see no data.",
+            "Given the identity provider is down When I try to sign in Then I am refused with a message and no local fallback account exists."
+          ],
+          "depends_on": [
+            "S-006",
+            "S-004"
+          ],
+          "requirement_refs": [
+            "FR-001",
+            "IN-001",
+            "UI-001"
+          ],
+          "labels": [
+            "blocked"
+          ]
+        },
+        {
+          "id": "S-010",
+          "title": "Server-side role enforcement",
+          "description": "As the firm I want every request checked against the user's role on the server so that screen tricks cannot bypass permissions.",
+          "priority": "P0",
+          "effort": "M",
+          "type": "security",
+          "acceptance_criteria": [
+            "Given an analyst When they call the approve API for a case Then the request is refused.",
+            "Given a changed browser state When a user sends a forged role Then the server ignores it and uses the identity provider role."
+          ],
+          "depends_on": [
+            "S-009"
+          ],
+          "requirement_refs": [
+            "FR-010",
+            "NF-002",
+            "DM-005"
+          ],
+          "labels": []
+        },
+        {
+          "id": "S-011",
+          "title": "Audit trail of status changes",
+          "description": "As a compliance officer I see who changed each case, when and why so that decisions are accountable.",
+          "priority": "P0",
+          "effort": "M",
+          "type": "security",
+          "acceptance_criteria": [
+            "Given a case status changes When the change is saved Then an audit event with actor, time, old and new status and note exists.",
+            "Given an audit event When anyone tries to edit or delete it Then it is refused."
+          ],
+          "depends_on": [
+            "S-007"
+          ],
+          "requirement_refs": [
+            "BR-009",
+            "DM-002",
+            "NF-004"
+          ],
+          "labels": []
+        },
+        {
+          "id": "S-012",
+          "title": "Protect personal data and escape displayed text",
+          "description": "As the firm I want personal data protected and user text escaped so that data is not leaked or run as code.",
+          "priority": "P0",
+          "effort": "M",
+          "type": "security",
+          "acceptance_criteria": [
+            "Given a name containing script text When a page shows it Then it is displayed as text and not executed.",
+            "Given the logs and the database When inspected Then ID number and date of birth are not in logs and are protected at rest."
+          ],
+          "depends_on": [
+            "S-007"
+          ],
+          "requirement_refs": [
+            "NF-003",
+            "UI-007"
+          ],
+          "labels": []
+        }
+      ]
+    },
+    {
+      "id": "E-03",
+      "title": "Risk rules and scoring",
+      "goal": "One agreed risk calculation used everywhere.",
+      "stories": [
+        {
+          "id": "S-013",
+          "title": "Configurable risk rules",
+          "description": "As a compliance owner I maintain the country list, points and thresholds outside the code so that rules change without a release.",
+          "priority": "P0",
+          "effort": "M",
+          "type": "feature",
+          "acceptance_criteria": [
+            "Given an owner updates the country list When saved Then a new rule version is recorded with who and when.",
+            "Given a non-owner When they try to change rules Then it is refused."
+          ],
+          "depends_on": [
+            "S-007",
+            "S-010",
+            "S-001"
+          ],
+          "requirement_refs": [
+            "BR-002",
+            "DM-004"
+          ],
+          "labels": [
+            "blocked"
+          ]
+        },
+        {
+          "id": "S-014",
+          "title": "Calculate score and rating",
+          "description": "As an analyst I get a score and rating for each case so that it is routed correctly.",
+          "priority": "P0",
+          "effort": "M",
+          "type": "feature",
+          "acceptance_criteria": [
+            "Given the confirmed rules When a case is scored Then score and rating match the agreed table, including at each threshold boundary.",
+            "Given a case already rated When rules change Then its stored rating keeps its rule version and the same rating shows on queue, case and report."
+          ],
+          "depends_on": [
+            "S-013"
+          ],
+          "requirement_refs": [
+            "FR-006",
+            "BR-001",
+            "BR-003"
+          ],
+          "labels": [
+            "blocked"
+          ]
+        },
+        {
+          "id": "S-015",
+          "title": "Next review date",
+          "description": "As a compliance officer I see when a customer must next be reviewed so that reviews are not missed.",
+          "priority": "P2",
+          "effort": "S",
+          "type": "feature",
+          "acceptance_criteria": [
+            "Given a decided case When the rating is High, Medium or Low Then the next review date is the confirmed years after the decision date.",
+            "Given a case not yet decided When shown Then no review date is displayed."
+          ],
+          "depends_on": [
+            "S-014",
+            "S-003"
+          ],
+          "requirement_refs": [
+            "BR-007",
+            "FR-014"
+          ],
+          "labels": [
+            "blocked"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E-04",
+      "title": "Capture customer",
+      "goal": "Analysts can create validated, screened cases.",
+      "stories": [
+        {
+          "id": "S-016",
+          "title": "Create a case with validation",
+          "description": "As an analyst I create a case so that a customer can be onboarded.",
+          "priority": "P0",
+          "effort": "M",
+          "type": "feature",
+          "acceptance_criteria": [
+            "Given a valid form When I submit Then the case is saved with my name and time.",
+            "Given a missing required field, an age under 18 or an expired ID When I submit Then I get a clear message and nothing is saved.",
+            "Given a date of birth exactly 18 years ago today When I submit Then it is accepted."
+          ],
+          "depends_on": [
+            "S-007",
+            "S-010",
+            "S-005"
+          ],
+          "requirement_refs": [
+            "FR-002",
+            "FR-003",
+            "BR-005",
+            "BR-006",
+            "UI-003"
+          ],
+          "labels": [
+            "partially-blocked"
+          ]
+        },
+        {
+          "id": "S-017",
+          "title": "Screen names against sanctions and PEP sources",
+          "description": "As an analyst I want each new customer screened so that sanctioned and PEP customers are caught.",
+          "priority": "P0",
+          "effort": "L",
+          "type": "feature",
+          "acceptance_criteria": [
+            "Given a name matching the sanctions source When a case is created Then the screening result is stored and the case is blocked.",
+            "Given a PEP match and a declared non-PEP When created Then the case is marked PEP.",
+            "Given the provider is unavailable When a case is created Then it is held as screening unavailable, never as no match."
+          ],
+          "depends_on": [
+            "S-016",
+            "S-004"
+          ],
+          "requirement_refs": [
+            "FR-004",
+            "FR-005",
+            "BR-011",
+            "IN-002",
+            "DM-003"
+          ],
+          "labels": [
+            "blocked"
+          ]
+        },
+        {
+          "id": "S-018",
+          "title": "Ad-hoc name screening",
+          "description": "As any user I check a name without creating a case.",
+          "priority": "P2",
+          "effort": "S",
+          "type": "feature",
+          "acceptance_criteria": [
+            "Given a name When I screen it Then I see sanctions and PEP results and the check is recorded.",
+            "Given an empty name When I screen Then I am asked to enter one."
+          ],
+          "depends_on": [
+            "S-017"
+          ],
+          "requirement_refs": [
+            "FR-012",
+            "UI-005"
+          ],
+          "labels": [
+            "blocked"
+          ]
+        },
+        {
+          "id": "S-019",
+          "title": "Route new cases and block sanctions matches",
+          "description": "As the firm I want new cases blocked or routed to the right approver so that risk gets proper review.",
+          "priority": "P0",
+          "effort": "M",
+          "type": "feature",
+          "acceptance_criteria": [
+            "Given a sanctions match When the case is created Then status is blocked and it cannot be approved.",
+            "Given a non-blocked case When created Then it is pending_review for the approver of its rating, with no automatic approval unless decided otherwise.",
+            "Given a status outside the allowed list When set Then it is refused."
+          ],
+          "depends_on": [
+            "S-014",
+            "S-017",
+            "S-002",
+            "S-003"
+          ],
+          "requirement_refs": [
+            "FR-007",
+            "FR-008",
+            "BR-008",
+            "BR-004"
+          ],
+          "labels": [
+            "blocked"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E-05",
+      "title": "Review cases",
+      "goal": "Approvers see the queue and record decisions within their authority.",
+      "stories": [
+        {
+          "id": "S-020",
+          "title": "Review queue with counts",
+          "description": "As a reviewer I see all cases and counts so that I can work the queue.",
+          "priority": "P0",
+          "effort": "M",
+          "type": "feature",
+          "acceptance_criteria": [
+            "Given cases exist When I open the queue Then I see total, awaiting decision, High and blocked counts and a table with status and rating.",
+            "Given no cases When I open the queue Then I see an empty state, not an error."
+          ],
+          "depends_on": [
+            "S-014",
+            "S-010"
+          ],
+          "requirement_refs": [
+            "FR-011",
+            "UI-002"
+          ],
+          "labels": []
+        },
+        {
+          "id": "S-021",
+          "title": "Case detail page",
+          "description": "As a reviewer I see all details, screening and history of a case.",
+          "priority": "P0",
+          "effort": "M",
+          "type": "feature",
+          "acceptance_criteria": [
+            "Given a case When I open it Then I see customer data, stored rating, screening result and decision history.",
+            "Given an unknown case id When I open it Then I see not found and no data."
+          ],
+          "depends_on": [
+            "S-014",
+            "S-011"
+          ],
+          "requirement_refs": [
+            "FR-014",
+            "UI-004"
+          ],
+          "labels": []
+        },
+        {
+          "id": "S-022",
+          "title": "Approve, reject or escalate with a note",
+          "description": "As a permitted approver I decide a pending case and give a note.",
+          "priority": "P0",
+          "effort": "M",
+          "type": "feature",
+          "acceptance_criteria": [
+            "Given a High case and a senior analyst When they try to approve Then it is refused (matrix as confirmed).",
+            "Given a pending case and a permitted approver When they approve with a note Then status, decider, time and note are saved and audited.",
+            "Given no note When submitting Then the decision is refused, and a creator deciding their own case follows the four-eyes decision."
+          ],
+          "depends_on": [
+            "S-021",
+            "S-011",
+            "S-002"
+          ],
+          "requirement_refs": [
+            "FR-009",
+            "BR-004",
+            "BR-010",
+            "BR-008"
+          ],
+          "labels": [
+            "blocked"
+          ]
+        },
+        {
+          "id": "S-023",
+          "title": "Blocked sanctions case handling",
+          "description": "As a compliance officer I handle blocked cases in the agreed way.",
+          "priority": "P1",
+          "effort": "M",
+          "type": "feature",
+          "acceptance_criteria": [
+            "Given a blocked case When I open it Then I see the agreed actions only for my role.",
+            "Given an unauthorised role When trying to release Then it is refused."
+          ],
+          "depends_on": [
+            "S-022",
+            "S-003"
+          ],
+          "requirement_refs": [
+            "FR-007"
+          ],
+          "labels": [
+            "blocked"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E-06",
+      "title": "Reports",
+      "goal": "Authorised users report on and export cases safely.",
+      "stories": [
+        {
+          "id": "S-024",
+          "title": "Case report with rating filter and CSV export",
+          "description": "As an authorised user I filter cases by rating and export CSV.",
+          "priority": "P1",
+          "effort": "M",
+          "type": "feature",
+          "acceptance_criteria": [
+            "Given the rating filter When I select High Then only High cases are listed with the same rating as elsewhere.",
+            "Given a name starting with a formula character When exported Then it is escaped, the export is audited, and unauthorised roles are refused."
+          ],
+          "depends_on": [
+            "S-014",
+            "S-011",
+            "S-012",
+            "S-005"
+          ],
+          "requirement_refs": [
+            "FR-013",
+            "NF-003",
+            "UI-006"
+          ],
+          "labels": [
+            "partially-blocked"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E-07",
+      "title": "Quality targets",
+      "goal": "Performance and accessibility verified.",
+      "stories": [
+        {
+          "id": "S-025",
+          "title": "Verify performance and accessibility targets",
+          "description": "As the business I want the app to meet agreed speed and accessibility targets.",
+          "priority": "P2",
+          "effort": "M",
+          "type": "tech",
+          "acceptance_criteria": [
+            "Given a load test with expected users When run Then 95 percent of requests meet the confirmed target (proposed 2 seconds).",
+            "Given an accessibility scan and keyboard test When run Then no WCAG 2.1 AA failures remain."
+          ],
+          "depends_on": [
+            "S-020",
+            "S-021"
+          ],
+          "requirement_refs": [
+            "NF-005",
+            "NF-006"
+          ],
+          "labels": [
+            "needs-confirmation"
+          ]
+        }
+      ]
+    }
+  ]
+}

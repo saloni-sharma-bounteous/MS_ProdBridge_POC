@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Screening - KYC Desk</title>
+<link rel="stylesheet" href="css/style.css"></head>
+<body>
+<div id="nav"></div>
+<main>
+  <h1>Name screening</h1>
+  <div class="card">
+    <label>Name to check <input id="q" placeholder="Full name"></label>
+    <button onclick="runScreen()">Screen</button>
+    <div id="out" class="msg"></div>
+  </div>
+</main>
+<script src="js/auth.js"></script><script src="js/screening.js"></script><script src="js/nav.js"></script>
+<script>
+  requireLogin(); renderNav();
+  function runScreen() {
+    var q = document.getElementById("q").value;
+    var r = screenName(q);
+    document.getElementById("out").innerHTML = "<b>" + q + "</b>: " +
+      (r.sanctioned ? '<span class="pill blocked">SANCTIONS MATCH</span> ' : "no sanctions match. ") +
+      (r.pep ? '<span class="pill Medium">PEP match</span>' : "no PEP match.");
+  }
+</script>
+</body></html>

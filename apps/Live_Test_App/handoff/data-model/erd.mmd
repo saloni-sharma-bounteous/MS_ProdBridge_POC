@@ -1,0 +1,123 @@
+erDiagram
+  app_user {
+    uuid id PK
+    varchar_100 directory_subject UK
+    varchar_200 display_name
+    varchar_200 work_email
+    enum_user_role role
+    boolean is_active
+  }
+  risk_rule_set {
+    uuid id PK
+    integer rule_version UK
+    date effective_from
+    smallint points_high_risk_nationality
+    smallint points_high_risk_residence
+    smallint points_pep
+    smallint points_cash_intensive_occupation
+    numeric_14_2 volume_high_limit
+    smallint points_volume_high
+    numeric_14_2 volume_medium_limit
+    smallint points_volume_medium
+    smallint points_source_other_unknown
+    smallint points_not_face_to_face
+    smallint high_min_score
+    smallint medium_min_score
+    smallint review_years_high
+    smallint review_years_medium
+    smallint review_years_low
+    enum_user_role approver_role_high
+    enum_user_role approver_role_medium
+    enum_user_role approver_role_low
+    boolean auto_approve_low
+  }
+  risk_rule_list_item {
+    uuid id PK
+    uuid rule_set_id FK
+    enum_rule_list_type list_type
+    varchar_60 item_value
+  }
+  audit_log {
+    uuid id PK
+    varchar_60 entity_name
+    uuid entity_id
+    varchar_30 action
+    varchar_100 actor
+    timestamptz occurred_at
+    jsonb before_state
+    jsonb after_state
+  }
+  customer {
+    uuid id PK
+    varchar_200 full_name
+    date date_of_birth
+    varchar_2 nationality
+    varchar_2 residence_country
+    enum_occupation occupation
+  }
+  identity_document {
+    uuid id PK
+    uuid customer_id FK
+    enum_id_type id_type
+    varchar_60 id_number
+    date expiry_date
+  }
+  onboarding_case {
+    uuid id PK
+    uuid customer_id FK
+    uuid identity_document_id FK
+    enum_source_of_funds source_of_funds
+    numeric_14_2 monthly_volume_usd
+    boolean is_pep_declared
+    boolean is_face_to_face
+    enum_case_status status
+  }
+  screening_check {
+    uuid id PK
+    uuid onboarding_case_id FK
+    varchar_200 name_searched
+    varchar_60 source_version
+    enum_screening_result result
+    uuid screened_by_id FK
+    timestamptz screened_at
+  }
+  risk_assessment {
+    uuid id PK
+    uuid onboarding_case_id FK
+    smallint sequence_no
+    uuid rule_set_id FK
+    smallint score
+    enum_risk_rating rating
+    boolean is_pep_applied
+    timestamptz assessed_at
+  }
+  case_decision {
+    uuid id PK
+    uuid onboarding_case_id FK
+    enum_decision_action action
+    enum_case_status old_status
+    enum_case_status new_status
+    uuid actor_id FK
+    timestamptz decided_at
+    text note
+  }
+  periodic_review {
+    uuid id PK
+    uuid customer_id FK
+    uuid source_case_id FK
+    date due_date
+    enum_review_status status
+    timestamptz completed_at
+  }
+  risk_rule_set ||--o{ risk_rule_list_item : "rule_set_id"
+  customer ||--o{ identity_document : "customer_id"
+  customer ||--o{ onboarding_case : "customer_id"
+  identity_document ||--o{ onboarding_case : "identity_document_id"
+  onboarding_case |o--o{ screening_check : "onboarding_case_id"
+  app_user ||--o{ screening_check : "screened_by_id"
+  onboarding_case ||--o{ risk_assessment : "onboarding_case_id"
+  risk_rule_set ||--o{ risk_assessment : "rule_set_id"
+  onboarding_case ||--o{ case_decision : "onboarding_case_id"
+  app_user ||--o{ case_decision : "actor_id"
+  customer ||--o{ periodic_review : "customer_id"
+  onboarding_case ||--o{ periodic_review : "source_case_id"

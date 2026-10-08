@@ -1,0 +1,315 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Target data model",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "model",
+    "enums",
+    "entities"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "model": {
+      "type": "object",
+      "required": [
+        "name",
+        "description",
+        "dialect",
+        "version"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2
+        },
+        "description": {
+          "type": "string",
+          "minLength": 10
+        },
+        "dialect": {
+          "enum": [
+            "postgresql"
+          ]
+        },
+        "schema": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "source_spec": {
+          "type": "string"
+        }
+      }
+    },
+    "enums": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "values"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "values": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "spec_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "entities": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/entity"
+      }
+    }
+  },
+  "$defs": {
+    "entity": {
+      "type": "object",
+      "required": [
+        "name",
+        "description",
+        "classification",
+        "audit",
+        "attributes"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 10
+        },
+        "classification": {
+          "enum": [
+            "Restricted",
+            "Confidential",
+            "Internal",
+            "Public"
+          ]
+        },
+        "audit": {
+          "type": "boolean"
+        },
+        "rls": {
+          "type": "boolean"
+        },
+        "reference_data": {
+          "type": "boolean"
+        },
+        "retention": {
+          "type": "string"
+        },
+        "spec_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "attributes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/attribute"
+          }
+        },
+        "unique": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "foreign_keys": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "columns",
+              "references_entity",
+              "references_columns",
+              "on_delete"
+            ],
+            "properties": {
+              "columns": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "references_entity": {
+                "type": "string"
+              },
+              "references_columns": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "on_delete": {
+                "enum": [
+                  "restrict",
+                  "cascade",
+                  "set null",
+                  "no action"
+                ]
+              }
+            }
+          }
+        },
+        "indexes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "columns"
+            ],
+            "properties": {
+              "columns": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "unique": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "expression"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              },
+              "expression": {
+                "type": "string",
+                "minLength": 3
+              },
+              "spec_refs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "seed": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "attribute": {
+      "type": "object",
+      "required": [
+        "name",
+        "type",
+        "nullable",
+        "classification",
+        "personal_data",
+        "protection",
+        "description"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "type": {
+          "type": "string",
+          "pattern": "^(uuid|text|integer|bigint|smallint|boolean|date|timestamptz|jsonb|varchar\\([0-9]+\\)|numeric\\([0-9]+,[0-9]+\\)|enum:[a-z][a-z0-9_]*)$"
+        },
+        "nullable": {
+          "type": "boolean"
+        },
+        "default": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "primary_key": {
+          "type": "boolean"
+        },
+        "classification": {
+          "enum": [
+            "Restricted",
+            "Confidential",
+            "Internal",
+            "Public"
+          ]
+        },
+        "personal_data": {
+          "type": "boolean"
+        },
+        "protection": {
+          "enum": [
+            "none",
+            "encrypted_at_rest",
+            "tokenized",
+            "hashed"
+          ]
+        },
+        "protection_note": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 5
+        },
+        "spec_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "server_managed": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

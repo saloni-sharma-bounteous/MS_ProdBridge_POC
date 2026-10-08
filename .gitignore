@@ -1,0 +1,16 @@
+﻿# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Local tooling / OS
+.claude/settings.local.json
+.playwright-mcp/
+node_modules/
+.DS_Store
+Thumbs.db

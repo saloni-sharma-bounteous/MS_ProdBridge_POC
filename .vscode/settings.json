@@ -1,0 +1,5 @@
+{
+  "chat.promptFilesLocations": {
+    ".claude/prompts": true
+  }
+}

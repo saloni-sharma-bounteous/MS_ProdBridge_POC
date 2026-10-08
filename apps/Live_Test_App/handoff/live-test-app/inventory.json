@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-10-08T07:31:53Z",
+  "project": {
+    "name": "Live_Test_App",
+    "root_type": "unknown",
+    "origin": [],
+    "file_count": 1,
+    "loc": 0
+  },
+  "stack": {
+    "languages": {},
+    "frameworks": [],
+    "backend_services": []
+  },
+  "dependencies": {
+    "manifest": null,
+    "runtime": {},
+    "dev": {},
+    "lockfile_present": false
+  },
+  "files": [
+    {
+      "path": "ui.py",
+      "bytes": 21178,
+      "sha256": "1cba99239c5f6d9b9c616ea3152eb827c7a9873f9f927478e606ad17a288ce2c",
+      "lines": 0,
+      "kind": "other"
+    }
+  ],
+  "entry_points": {
+    "html_pages": [],
+    "routes": []
+  },
+  "data_model": {
+    "sql_tables": [],
+    "ts_types": [],
+    "supabase_tables_used": []
+  },
+  "integrations": {
+    "http_calls": [],
+    "url_literals": [],
+    "clients": [],
+    "external_scripts": []
+  },
+  "storage": {
+    "browser": []
+  },
+  "env_vars": {
+    "referenced": [],
+    "defined_in": []
+  },
+  "auth_signals": [],
+  "constants": [],
+  "functions": [],
+  "comments": [],
+  "legacy_candidates": [],
+  "summary": {
+    "html_pages": 0,
+    "routes": 0,
+    "sql_tables": 0,
+    "ts_types": 0,
+    "http_calls": 0,
+    "external_scripts": 0,
+    "browser_storage_keys": 0,
+    "env_vars_referenced": 0,
+    "env_files": 0,
+    "auth_signals": 0,
+    "constants": 0,
+    "functions": 0,
+    "todo_comments": 0,
+    "lockfile_present": false
+  }
+}

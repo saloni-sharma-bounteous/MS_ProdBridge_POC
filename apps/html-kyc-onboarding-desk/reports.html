@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Reports - KYC Desk</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div id="nav"></div>
+<main>
+  <h1>Onboarding report</h1>
+  <div class="card">
+    <select id="f" style="width:200px" onchange="draw()"><option value="">All ratings</option><option>High</option><option>Medium</option><option>Low</option></select>
+    <button class="ghost" onclick="exportCsv()">Export CSV</button>
+    <table style="margin-top:14px">
+      <thead><tr><th>Case</th><th>Name</th><th>DOB</th><th>ID number</th><th>Country</th><th>Rating</th><th>Status</th><th>Decided by</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+</main>
+<script src="js/auth.js"></script><script src="js/store.js"></script><script src="js/risk.js"></script><script src="js/nav.js"></script>
+<script>
+  requireLogin(); renderNav();
+  function filtered() {
+    var f = $("#f").val();
+    return getCases().filter(function (c) { return !f || scoreCase(c).rating === f; });
+  }
+  function draw() {
+    $("#rows").html(filtered().map(function (c) {
+      return "<tr><td>" + c.id + "</td><td>" + c.fullName + "</td><td>" + c.dob + "</td><td>" + c.idNumber + "</td><td>" + c.residenceCountry +
+        "</td><td>" + scoreCase(c).rating + "</td><td>" + c.status + "</td><td>" + (c.decidedBy || "") + "</td></tr>";
+    }).join(""));
+  }
+  function exportCsv() {
+    var lines = ["case,name,dob,id_number,country,rating,status"];
+    filtered().forEach(function (c) { lines.push([c.id, c.fullName, c.dob, c.idNumber, c.residenceCountry, scoreCase(c).rating, c.status].join(",")); });
+    var a = document.createElement("a");
+    a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(lines.join("\n"));
+    a.download = "kyc-report.csv"; a.click();
+  }
+  draw();
+</script>
+</body></html>

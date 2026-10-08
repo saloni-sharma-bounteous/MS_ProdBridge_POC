@@ -1,0 +1,118 @@
+{
+ "id": "reports",
+ "source": "reports.html",
+ "url": "",
+ "title": "Reports - KYC Desk",
+ "viewport": null,
+ "screenshot": "",
+ "headings": [
+  {
+   "level": 1,
+   "text": "Onboarding report"
+  }
+ ],
+ "elements": [
+  {
+   "kind": "select",
+   "tag": "select",
+   "role": "combobox",
+   "type": "",
+   "id": "f",
+   "name_attr": "",
+   "placeholder": "",
+   "aria_label": "",
+   "title": "",
+   "href": "",
+   "testid": "",
+   "required": false,
+   "disabled": false,
+   "pattern": "",
+   "min": "",
+   "max": "",
+   "maxlength": "",
+   "handlers": {
+    "onchange": "draw()"
+   },
+   "form": "",
+   "text": "",
+   "label": "",
+   "line": 11,
+   "options": [
+    "All ratings",
+    "High",
+    "Medium",
+    "Low"
+   ],
+   "name": "f",
+   "locator": "page.locator(\"#f\")",
+   "visible": true,
+   "eid": "e1"
+  },
+  {
+   "kind": "button",
+   "tag": "button",
+   "role": "button",
+   "type": "button",
+   "id": "",
+   "name_attr": "",
+   "placeholder": "",
+   "aria_label": "",
+   "title": "",
+   "href": "",
+   "testid": "",
+   "required": false,
+   "disabled": false,
+   "pattern": "",
+   "min": "",
+   "max": "",
+   "maxlength": "",
+   "handlers": {
+    "onclick": "exportCsv()"
+   },
+   "form": "",
+   "text": "Export CSV",
+   "label": "",
+   "line": 12,
+   "options": [],
+   "name": "Export CSV",
+   "locator": "page.get_by_role(\"button\", name=\"Export CSV\")",
+   "visible": true,
+   "eid": "e2"
+  }
+ ],
+ "forms": [],
+ "tables": [
+  {
+   "id": "table-1",
+   "headers": [
+    "Case",
+    "Name",
+    "DOB",
+    "ID number",
+    "Country",
+    "Rating",
+    "Status",
+    "Decided by"
+   ],
+   "line": 13
+  }
+ ],
+ "scripts": [
+  "https://code.jquery.com/jquery-3.6.0.min.js",
+  "js/auth.js",
+  "js/store.js",
+  "js/risk.js",
+  "js/nav.js"
+ ],
+ "inline_script_count": 1,
+ "rendered_by_script": true,
+ "script_navigation": [
+  "login.html"
+ ],
+ "network": [],
+ "browser_storage_keys": [
+  "user"
+ ],
+ "console_errors": [],
+ "mode": "static"
+}

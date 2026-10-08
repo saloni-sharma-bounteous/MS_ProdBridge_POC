@@ -1,0 +1,121 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "App inventory",
+  "type": "object",
+  "required": ["schema_version", "generated_at", "project", "stack", "dependencies", "files", "entry_points",
+               "data_model", "integrations", "storage", "env_vars", "auth_signals", "constants", "functions",
+               "comments", "legacy_candidates", "summary"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "generated_at": {"type": "string"},
+    "project": {
+      "type": "object",
+      "required": ["name", "root_type", "origin", "file_count", "loc"],
+      "properties": {
+        "name": {"type": "string"},
+        "root_type": {"enum": ["node-app", "static-multipage", "single-file-html", "unknown"]},
+        "origin": {"type": "array", "items": {"type": "string"}},
+        "file_count": {"type": "integer"},
+        "loc": {"type": "integer"}
+      }
+    },
+    "stack": {
+      "type": "object",
+      "required": ["languages", "frameworks", "backend_services"],
+      "properties": {
+        "languages": {"type": "object"},
+        "frameworks": {"type": "array", "items": {"type": "string"}},
+        "backend_services": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "required": ["manifest", "runtime", "dev", "lockfile_present"],
+      "properties": {
+        "manifest": {"type": ["string", "null"]},
+        "runtime": {"type": "object"},
+        "dev": {"type": "object"},
+        "lockfile_present": {"type": "boolean"}
+      }
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "bytes", "sha256", "lines", "kind"],
+        "properties": {
+          "path": {"type": "string"}, "bytes": {"type": "integer"}, "sha256": {"type": "string", "minLength": 64},
+          "lines": {"type": "integer"}, "kind": {"type": "string"}
+        }
+      }
+    },
+    "entry_points": {
+      "type": "object",
+      "required": ["html_pages", "routes"],
+      "properties": {
+        "html_pages": {"type": "array", "items": {"$ref": "#/$defs/page"}},
+        "routes": {"type": "array", "items": {"$ref": "#/$defs/route"}}
+      }
+    },
+    "data_model": {
+      "type": "object",
+      "required": ["sql_tables", "ts_types", "supabase_tables_used"],
+      "properties": {
+        "sql_tables": {"type": "array", "items": {"$ref": "#/$defs/table"}},
+        "ts_types": {"type": "array"},
+        "supabase_tables_used": {"type": "array"}
+      }
+    },
+    "integrations": {
+      "type": "object",
+      "required": ["http_calls", "url_literals", "clients", "external_scripts"],
+      "properties": {
+        "http_calls": {"type": "array"}, "url_literals": {"type": "array"},
+        "clients": {"type": "array"}, "external_scripts": {"type": "array"}
+      }
+    },
+    "storage": {"type": "object", "required": ["browser"], "properties": {"browser": {"type": "array"}}},
+    "env_vars": {
+      "type": "object",
+      "required": ["referenced", "defined_in"],
+      "properties": {"referenced": {"type": "array"}, "defined_in": {"type": "array"}}
+    },
+    "auth_signals": {"type": "array"},
+    "constants": {"type": "array"},
+    "functions": {"type": "array"},
+    "comments": {"type": "array"},
+    "legacy_candidates": {"type": "array", "items": {"type": "string"}},
+    "summary": {"type": "object"}
+  },
+  "$defs": {
+    "page": {
+      "type": "object",
+      "required": ["path", "title", "scripts", "stylesheets", "inline_script_count"],
+      "properties": {
+        "path": {"type": "string"}, "title": {"type": "string"},
+        "scripts": {"type": "array", "items": {"type": "string"}},
+        "stylesheets": {"type": "array", "items": {"type": "string"}},
+        "inline_script_count": {"type": "integer"}
+      }
+    },
+    "route": {
+      "type": "object",
+      "required": ["path", "components", "file", "line"],
+      "properties": {
+        "path": {"type": ["string", "null"]}, "components": {"type": "array", "items": {"type": "string"}},
+        "file": {"type": "string"}, "line": {"type": "integer"}
+      }
+    },
+    "table": {
+      "type": "object",
+      "required": ["name", "columns", "rls_enabled", "policies", "file", "line"],
+      "properties": {
+        "name": {"type": "string"},
+        "columns": {"type": "array", "items": {"type": "object", "required": ["name", "type"]}},
+        "rls_enabled": {"type": "boolean"},
+        "policies": {"type": "array"},
+        "file": {"type": "string"}, "line": {"type": "integer"}
+      }
+    }
+  }
+}

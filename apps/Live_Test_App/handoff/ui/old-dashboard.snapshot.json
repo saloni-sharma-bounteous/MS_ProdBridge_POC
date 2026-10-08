@@ -1,0 +1,25 @@
+{
+ "id": "old-dashboard",
+ "source": "old-dashboard.html",
+ "url": "",
+ "title": "Old dashboard",
+ "viewport": null,
+ "screenshot": "",
+ "headings": [
+  {
+   "level": 2,
+   "text": "Legacy dashboard (do not use)"
+  }
+ ],
+ "elements": [],
+ "forms": [],
+ "tables": [],
+ "scripts": [],
+ "inline_script_count": 1,
+ "rendered_by_script": false,
+ "script_navigation": [],
+ "network": [],
+ "browser_storage_keys": [],
+ "console_errors": [],
+ "mode": "static"
+}

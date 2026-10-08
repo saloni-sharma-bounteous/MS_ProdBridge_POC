@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Queue - KYC Desk</title>
+<link rel="stylesheet" href="css/style.css"></head>
+<body>
+<div id="nav"></div>
+<main>
+  <h1>Review queue</h1>
+  <div class="grid" id="stats"></div>
+  <div class="card" style="margin-top:18px">
+    <table>
+      <thead><tr><th>Case</th><th>Customer</th><th>Rating</th><th>Status</th><th>Created</th><th></th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+</main>
+<script src="js/auth.js"></script><script src="js/store.js"></script><script src="js/nav.js"></script>
+<script>
+  requireLogin(); seedIfEmpty(); renderNav();
+
+  function quickApprove(id) {
+    // shortcut for low-value cases from the queue
+    updateCase(id, { status: "approved", decidedBy: currentUser().name });
+    location.reload();
+  }
+
+  var all = getCases();
+  var pending = all.filter(function (c) { return c.status === "pending_review" || c.status === "escalated"; });
+  document.getElementById("stats").innerHTML =
+    '<div class="card stat"><b>' + all.length + '</b>Total cases</div>' +
+    '<div class="card stat"><b>' + pending.length + '</b>Awaiting decision</div>' +
+    '<div class="card stat"><b>' + all.filter(function (c) { return c.rating === "High"; }).length + '</b>High risk</div>' +
+    '<div class="card stat"><b>' + all.filter(function (c) { return c.status === "blocked"; }).length + '</b>Blocked (screening)</div>';
+
+  document.getElementById("rows").innerHTML = all.map(function (c) {
+    return '<tr><td><a href="case.html?id=' + c.id + '">' + c.id + '</a></td><td>' + c.fullName + '</td>' +
+      '<td><span class="pill ' + c.rating + '">' + c.rating + '</span></td>' +
+      '<td><span class="pill ' + c.status + '">' + c.status + '</span></td>' +
+      '<td>' + c.createdAt.substring(0, 10) + '</td>' +
+      '<td>' + (c.status === "pending_review" ? '<button class="ghost" onclick="quickApprove(\'' + c.id + '\')">Quick approve</button>' : '') + '</td></tr>';
+  }).join("");
+</script>
+</body></html>

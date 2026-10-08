@@ -1,0 +1,1632 @@
+{
+  "schema_version": "1.0",
+  "model": {
+    "name": "kyc-onboarding-desk",
+    "description": "Target data model for the KYC onboarding desk: customer, identity document, case, scoring, screening and decisions as separate records. DRAFT: open questions answered with proposed defaults, none confirmed by an owner.",
+    "dialect": "postgresql",
+    "version": "0.3",
+    "source_spec": "handoff/spec.md"
+  },
+  "enums": [
+    {
+      "name": "user_role",
+      "values": [
+        "analyst",
+        "senior_analyst",
+        "compliance_officer",
+        "admin"
+      ],
+      "description": "Roles from the spec; mapping from the identity provider is open (Q-007) [Q-007]",
+      "spec_refs": [
+        "DM-005"
+      ]
+    },
+    {
+      "name": "id_type",
+      "values": [
+        "passport",
+        "national_id",
+        "driving_licence"
+      ],
+      "description": "ID document types seen in the prototype; full list open (Q-008) [FR-002, Q-008]"
+    },
+    {
+      "name": "occupation",
+      "values": [
+        "engineer",
+        "teacher",
+        "government_official",
+        "casino",
+        "money_service",
+        "car_dealer",
+        "jewellery",
+        "other"
+      ],
+      "description": "Occupation codes from the prototype form; list open (Q-008) [FR-002]",
+      "spec_refs": [
+        "BR-001"
+      ]
+    },
+    {
+      "name": "source_of_funds",
+      "values": [
+        "salary",
+        "business",
+        "inheritance",
+        "other",
+        "unknown"
+      ],
+      "description": "Source of funds codes from the prototype form [FR-002]",
+      "spec_refs": [
+        "BR-001"
+      ]
+    },
+    {
+      "name": "risk_rating",
+      "values": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "description": "Risk rating derived from the score",
+      "spec_refs": [
+        "BR-003"
+      ]
+    },
+    {
+      "name": "case_status",
+      "values": [
+        "pending_review",
+        "approved",
+        "rejected",
+        "escalated",
+        "blocked"
+      ],
+      "description": "Case lifecycle; only pending_review and escalated accept decisions",
+      "spec_refs": [
+        "BR-008"
+      ]
+    },
+    {
+      "name": "screening_result",
+      "values": [
+        "clear",
+        "pep_match",
+        "sanctions_match",
+        "unavailable"
+      ],
+      "description": "Outcome of a screening; unavailable is never treated as clear [FR-004]",
+      "spec_refs": [
+        "IN-002"
+      ]
+    },
+    {
+      "name": "rule_list_type",
+      "values": [
+        "high_risk_country",
+        "cash_intensive_occupation"
+      ],
+      "description": "Kinds of list a risk rule set owns",
+      "spec_refs": [
+        "BR-001",
+        "BR-002"
+      ]
+    },
+    {
+      "name": "decision_action",
+      "values": [
+        "approve",
+        "reject",
+        "escalate",
+        "block",
+        "release"
+      ],
+      "description": "A decision taken on a case; release is a placeholder for blocked-case handling (Q-005)",
+      "spec_refs": [
+        "DM-002",
+        "BR-009"
+      ]
+    },
+    {
+      "name": "review_status",
+      "values": [
+        "scheduled",
+        "completed",
+        "cancelled"
+      ],
+      "description": "State of a periodic review (Q-004)",
+      "spec_refs": [
+        "BR-007"
+      ]
+    }
+  ],
+  "entities": [
+    {
+      "name": "app_user",
+      "description": "A person known to the service, keyed by the identity provider subject; holds the role used for server-side authorisation. No passwords are stored. [FR-001, Q-007]",
+      "classification": "Confidential",
+      "audit": true,
+      "rls": false,
+      "retention": "Kept while any retained case or audit row refers to the user; deactivate, do not delete (proposed, Q-011)",
+      "spec_refs": [
+        "DM-005",
+        "IN-001"
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Surrogate identifier",
+          "default": "gen_random_uuid()",
+          "primary_key": true
+        },
+        {
+          "name": "directory_subject",
+          "type": "varchar(100)",
+          "nullable": false,
+          "classification": "Confidential",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Subject id from the identity provider",
+          "spec_refs": [
+            "IN-001"
+          ],
+          "server_managed": true
+        },
+        {
+          "name": "display_name",
+          "type": "varchar(200)",
+          "nullable": false,
+          "classification": "Confidential",
+          "personal_data": true,
+          "protection": "none",
+          "description": "Name shown in history and queues",
+          "server_managed": true
+        },
+        {
+          "name": "work_email",
+          "type": "varchar(200)",
+          "nullable": true,
+          "classification": "Confidential",
+          "personal_data": true,
+          "protection": "none",
+          "description": "Work email address",
+          "server_managed": true
+        },
+        {
+          "name": "role",
+          "type": "enum:user_role",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Role used for permission checks (BR-004); assignment source per Q-007 [Q-007]",
+          "spec_refs": [
+            "BR-004"
+          ],
+          "server_managed": true
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "False when access has been withdrawn; the row is kept for history",
+          "default": "true"
+        }
+      ],
+      "unique": [
+        [
+          "directory_subject"
+        ]
+      ]
+    },
+    {
+      "name": "risk_rule_set",
+      "description": "A versioned set of risk scoring rules: points, volume limits, rating thresholds, review cycle and approver per rating. Prototype values, unconfirmed (Q-001); owner not yet named. Cases store the version they were scored with. [FR-006, Q-001, Q-003, Q-004] Proposed decision: the scoring-module values (High 6+, Medium 3+, six countries) are used, matching REQ-0044 BR-5; the case page's second rule set is dropped (Q-001). Compliance owner to confirm.",
+      "classification": "Internal",
+      "audit": true,
+      "reference_data": true,
+      "retention": "Kept while any retained case refers to the rule version (proposed, Q-011)",
+      "spec_refs": [
+        "DM-004",
+        "BR-001",
+        "BR-003",
+        "BR-004",
+        "BR-007"
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Surrogate identifier",
+          "default": "gen_random_uuid()",
+          "primary_key": true
+        },
+        {
+          "name": "rule_version",
+          "type": "integer",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Rule version number stored on each scored case [FR-006]"
+        },
+        {
+          "name": "effective_from",
+          "type": "date",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Date the rule set applies from",
+          "spec_refs": [
+            "DM-004"
+          ]
+        },
+        {
+          "name": "points_high_risk_nationality",
+          "type": "smallint",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Points when nationality is in the high-risk list",
+          "spec_refs": [
+            "BR-001"
+          ]
+        },
+        {
+          "name": "points_high_risk_residence",
+          "type": "smallint",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Points when residence country is in the high-risk list",
+          "spec_refs": [
+            "BR-001"
+          ]
+        },
+        {
+          "name": "points_pep",
+          "type": "smallint",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Points for a PEP",
+          "spec_refs": [
+            "BR-001"
+          ]
+        },
+        {
+          "name": "points_cash_intensive_occupation",
+          "type": "smallint",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Points for a cash-intensive occupation",
+          "spec_refs": [
+            "BR-001"
+          ]
+        },
+        {
+          "name": "volume_high_limit",
+          "type": "numeric(14,2)",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Monthly volume above this (exclusive) scores the high volume points",
+          "spec_refs": [
+            "BR-001"
+          ]
+        },
+        {
+          "name": "points_volume_high",
+          "type": "smallint",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Points when volume is above the high limit",
+          "spec_refs": [
+            "BR-001"
+          ]
+        },
+        {
+          "name": "volume_medium_limit",
+          "type": "numeric(14,2)",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Monthly volume above this (exclusive) scores the medium volume points",
+          "spec_refs": [
+            "BR-001"
+          ]
+        },
+        {
+          "name": "points_volume_medium",
+          "type": "smallint",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Points when volume is above the medium limit",
+          "spec_refs": [
+            "BR-001"
+          ]
+        },
+        {
+          "name": "points_source_other_unknown",
+          "type": "smallint",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Points when source of funds is other or unknown",
+          "spec_refs": [
+            "BR-001"
+          ]
+        },
+        {
+          "name": "points_not_face_to_face",
+          "type": "smallint",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Points when the customer was not met face to face",
+          "spec_refs": [
+            "BR-001"
+          ]
+        },
+        {
+          "name": "high_min_score",
+          "type": "smallint",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Score at or above this is High",
+          "spec_refs": [
+            "BR-003"
+          ]
+        },
+        {
+          "name": "medium_min_score",
+          "type": "smallint",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Score at or above this (and below high) is Medium",
+          "spec_refs": [
+            "BR-003"
+          ]
+        },
+        {
+          "name": "review_years_high",
+          "type": "smallint",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Years until next review for High [Q-004]",
+          "spec_refs": [
+            "BR-007"
+          ]
+        },
+        {
+          "name": "review_years_medium",
+          "type": "smallint",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Years until next review for Medium [Q-004]",
+          "spec_refs": [
+            "BR-007"
+          ]
+        },
+        {
+          "name": "review_years_low",
+          "type": "smallint",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Years until next review for Low [Q-004]",
+          "spec_refs": [
+            "BR-007"
+          ]
+        },
+        {
+          "name": "approver_role_high",
+          "type": "enum:user_role",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Minimum role that may decide High cases [Q-003] Proposed: matrix enforced on the server, four-eyes required (Q-003).",
+          "spec_refs": [
+            "BR-004"
+          ]
+        },
+        {
+          "name": "approver_role_medium",
+          "type": "enum:user_role",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Minimum role that may decide Medium cases [Q-003] Proposed: matrix enforced on the server, four-eyes required (Q-003).",
+          "spec_refs": [
+            "BR-004"
+          ]
+        },
+        {
+          "name": "approver_role_low",
+          "type": "enum:user_role",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Minimum role that may decide Low cases [Q-003] Proposed: matrix enforced on the server, four-eyes required (Q-003).",
+          "spec_refs": [
+            "BR-004"
+          ]
+        },
+        {
+          "name": "auto_approve_low",
+          "type": "boolean",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "True if Low cases are approved without human review; proposed false until Q-002 is answered [Q-002] Proposed: false, every case gets a human decision (REQ-0044 BR-6 says automatic; Q-002 to confirm).",
+          "default": "false"
+        }
+      ],
+      "unique": [
+        [
+          "rule_version"
+        ]
+      ],
+      "checks": [
+        {
+          "name": "thresholds_ordered",
+          "expression": "medium_min_score > 0 AND high_min_score > medium_min_score",
+          "spec_refs": [
+            "BR-003"
+          ]
+        },
+        {
+          "name": "volume_limits_ordered",
+          "expression": "volume_medium_limit >= 0 AND volume_high_limit > volume_medium_limit",
+          "spec_refs": [
+            "BR-001"
+          ]
+        },
+        {
+          "name": "points_not_negative",
+          "expression": "points_high_risk_nationality >= 0 AND points_high_risk_residence >= 0 AND points_pep >= 0 AND points_cash_intensive_occupation >= 0 AND points_volume_high >= 0 AND points_volume_medium >= 0 AND points_source_other_unknown >= 0 AND points_not_face_to_face >= 0",
+          "spec_refs": [
+            "BR-001"
+          ]
+        },
+        {
+          "name": "review_years_positive",
+          "expression": "review_years_high > 0 AND review_years_medium > 0 AND review_years_low > 0",
+          "spec_refs": [
+            "BR-007"
+          ]
+        }
+      ],
+      "seed": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "rule_version": 1,
+          "effective_from": "2025-01-01",
+          "points_high_risk_nationality": 3,
+          "points_high_risk_residence": 3,
+          "points_pep": 3,
+          "points_cash_intensive_occupation": 2,
+          "volume_high_limit": 50000,
+          "points_volume_high": 2,
+          "volume_medium_limit": 10000,
+          "points_volume_medium": 1,
+          "points_source_other_unknown": 2,
+          "points_not_face_to_face": 1,
+          "high_min_score": 6,
+          "medium_min_score": 3,
+          "review_years_high": 1,
+          "review_years_medium": 2,
+          "review_years_low": 3,
+          "approver_role_high": "compliance_officer",
+          "approver_role_medium": "senior_analyst",
+          "approver_role_low": "analyst",
+          "auto_approve_low": false
+        }
+      ]
+    },
+    {
+      "name": "risk_rule_list_item",
+      "description": "One value in a list owned by a rule set, for example a high-risk country code or a cash-intensive occupation. Prototype values, unconfirmed (Q-001). [Q-001]",
+      "classification": "Internal",
+      "audit": true,
+      "reference_data": true,
+      "retention": "Kept while any retained case refers to the rule version (proposed, Q-011)",
+      "spec_refs": [
+        "BR-002",
+        "BR-001"
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Surrogate identifier",
+          "default": "gen_random_uuid()",
+          "primary_key": true
+        },
+        {
+          "name": "rule_set_id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Rule set the item belongs to",
+          "spec_refs": [
+            "BR-002"
+          ]
+        },
+        {
+          "name": "list_type",
+          "type": "enum:rule_list_type",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Which list the value belongs to",
+          "spec_refs": [
+            "BR-002"
+          ]
+        },
+        {
+          "name": "item_value",
+          "type": "varchar(60)",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Country code (ISO 3166 alpha-2) or occupation code",
+          "spec_refs": [
+            "BR-002"
+          ]
+        }
+      ],
+      "unique": [
+        [
+          "rule_set_id",
+          "list_type",
+          "item_value"
+        ]
+      ],
+      "foreign_keys": [
+        {
+          "columns": [
+            "rule_set_id"
+          ],
+          "references_entity": "risk_rule_set",
+          "references_columns": [
+            "id"
+          ],
+          "on_delete": "cascade"
+        }
+      ],
+      "seed": [
+        {
+          "rule_set_id": "00000000-0000-4000-8000-000000000001",
+          "list_type": "high_risk_country",
+          "item_value": "IR"
+        },
+        {
+          "rule_set_id": "00000000-0000-4000-8000-000000000001",
+          "list_type": "high_risk_country",
+          "item_value": "KP"
+        },
+        {
+          "rule_set_id": "00000000-0000-4000-8000-000000000001",
+          "list_type": "high_risk_country",
+          "item_value": "SY"
+        },
+        {
+          "rule_set_id": "00000000-0000-4000-8000-000000000001",
+          "list_type": "high_risk_country",
+          "item_value": "MM"
+        },
+        {
+          "rule_set_id": "00000000-0000-4000-8000-000000000001",
+          "list_type": "high_risk_country",
+          "item_value": "AF"
+        },
+        {
+          "rule_set_id": "00000000-0000-4000-8000-000000000001",
+          "list_type": "high_risk_country",
+          "item_value": "YE"
+        },
+        {
+          "rule_set_id": "00000000-0000-4000-8000-000000000001",
+          "list_type": "cash_intensive_occupation",
+          "item_value": "casino"
+        },
+        {
+          "rule_set_id": "00000000-0000-4000-8000-000000000001",
+          "list_type": "cash_intensive_occupation",
+          "item_value": "money_service"
+        },
+        {
+          "rule_set_id": "00000000-0000-4000-8000-000000000001",
+          "list_type": "cash_intensive_occupation",
+          "item_value": "car_dealer"
+        },
+        {
+          "rule_set_id": "00000000-0000-4000-8000-000000000001",
+          "list_type": "cash_intensive_occupation",
+          "item_value": "jewellery"
+        }
+      ]
+    },
+    {
+      "name": "audit_log",
+      "description": "Append-only record of views, exports, changes and configuration edits across the service (who, what, when, before and after). Design decision: covers events DM-002 does not, such as case views and CSV exports (REQ-0044 FR-8).",
+      "classification": "Restricted",
+      "audit": false,
+      "rls": true,
+      "retention": "5 years after the related case's relationship ends; never edited or deleted before then (proposed, Q-011, NF-004)",
+      "spec_refs": [
+        "NF-003",
+        "NF-004"
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Surrogate identifier",
+          "default": "gen_random_uuid()",
+          "primary_key": true
+        },
+        {
+          "name": "entity_name",
+          "type": "varchar(60)",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Table the action touched",
+          "server_managed": true
+        },
+        {
+          "name": "entity_id",
+          "type": "uuid",
+          "nullable": true,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Row the action touched; null for an export of many rows",
+          "server_managed": true
+        },
+        {
+          "name": "action",
+          "type": "varchar(30)",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "What happened, for example view, create, update, export",
+          "server_managed": true
+        },
+        {
+          "name": "actor",
+          "type": "varchar(100)",
+          "nullable": false,
+          "classification": "Confidential",
+          "personal_data": true,
+          "protection": "none",
+          "description": "Identity provider subject of the user or service",
+          "server_managed": true
+        },
+        {
+          "name": "occurred_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "When it happened",
+          "default": "now()",
+          "server_managed": true
+        },
+        {
+          "name": "before_state",
+          "type": "jsonb",
+          "nullable": true,
+          "classification": "Restricted",
+          "personal_data": true,
+          "protection": "encrypted_at_rest",
+          "description": "Values before the change; sensitive fields masked or tokenized by the service",
+          "server_managed": true
+        },
+        {
+          "name": "after_state",
+          "type": "jsonb",
+          "nullable": true,
+          "classification": "Restricted",
+          "personal_data": true,
+          "protection": "encrypted_at_rest",
+          "description": "Values after the change; sensitive fields masked or tokenized by the service",
+          "server_managed": true
+        }
+      ],
+      "indexes": [
+        {
+          "columns": [
+            "entity_name",
+            "entity_id"
+          ]
+        },
+        {
+          "columns": [
+            "occurred_at"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "customer",
+      "description": "The person being onboarded, held once however many cases or documents they have. Separates who the customer is from each onboarding attempt.",
+      "classification": "Restricted",
+      "audit": true,
+      "rls": true,
+      "retention": "5 years after the customer relationship ends (proposed, Q-011)",
+      "spec_refs": [
+        "DM-001"
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Surrogate identifier",
+          "primary_key": true,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "full_name",
+          "type": "varchar(200)",
+          "nullable": false,
+          "classification": "Confidential",
+          "personal_data": true,
+          "protection": "encrypted_at_rest",
+          "description": "Customer full name"
+        },
+        {
+          "name": "date_of_birth",
+          "type": "date",
+          "nullable": false,
+          "classification": "Restricted",
+          "personal_data": true,
+          "protection": "encrypted_at_rest",
+          "description": "Date of birth; at least 18 on the day of the case (BR-005). Unmasked only for compliance_officer (proposed, Q-010)",
+          "spec_refs": [
+            "BR-005"
+          ]
+        },
+        {
+          "name": "nationality",
+          "type": "varchar(2)",
+          "nullable": false,
+          "classification": "Confidential",
+          "personal_data": true,
+          "protection": "none",
+          "description": "ISO 3166 alpha-2 country code"
+        },
+        {
+          "name": "residence_country",
+          "type": "varchar(2)",
+          "nullable": false,
+          "classification": "Confidential",
+          "personal_data": true,
+          "protection": "none",
+          "description": "ISO 3166 alpha-2 country code"
+        },
+        {
+          "name": "occupation",
+          "type": "enum:occupation",
+          "nullable": false,
+          "classification": "Confidential",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Occupation code"
+        }
+      ],
+      "indexes": [
+        {
+          "columns": [
+            "full_name"
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "name": "country_codes",
+          "expression": "nationality ~ '^[A-Z]{2}$' AND residence_country ~ '^[A-Z]{2}$'"
+        }
+      ]
+    },
+    {
+      "name": "identity_document",
+      "description": "An identity document shown by a customer. Only metadata and the number are kept; storing a scanned copy is out of scope in the spec (REQ-0044 FR-7 would add it).",
+      "classification": "Restricted",
+      "audit": true,
+      "rls": true,
+      "retention": "5 years after the customer relationship ends (proposed, Q-011)",
+      "spec_refs": [
+        "DM-001"
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Surrogate identifier",
+          "primary_key": true,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "customer_id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Owner of the document",
+          "server_managed": true
+        },
+        {
+          "name": "id_type",
+          "type": "enum:id_type",
+          "nullable": false,
+          "classification": "Confidential",
+          "personal_data": true,
+          "protection": "none",
+          "description": "Document type"
+        },
+        {
+          "name": "id_number",
+          "type": "varchar(60)",
+          "nullable": false,
+          "classification": "Restricted",
+          "personal_data": true,
+          "protection": "encrypted_at_rest",
+          "description": "Document number; unmasked only for compliance_officer (proposed, Q-010)"
+        },
+        {
+          "name": "expiry_date",
+          "type": "date",
+          "nullable": false,
+          "classification": "Confidential",
+          "personal_data": true,
+          "protection": "none",
+          "description": "Expiry date; today or later when a case is created (BR-006)",
+          "spec_refs": [
+            "BR-006"
+          ]
+        }
+      ],
+      "foreign_keys": [
+        {
+          "columns": [
+            "customer_id"
+          ],
+          "references_entity": "customer",
+          "references_columns": [
+            "id"
+          ],
+          "on_delete": "restrict"
+        }
+      ],
+      "indexes": [
+        {
+          "columns": [
+            "expiry_date"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "onboarding_case",
+      "description": "One onboarding attempt for a customer: the declarations made at the time and the current status. Score, screening and decisions are separate rows so history is never overwritten.",
+      "classification": "Confidential",
+      "audit": true,
+      "rls": true,
+      "retention": "5 years after the customer relationship ends (proposed, Q-011)",
+      "spec_refs": [
+        "DM-001",
+        "BR-008"
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Surrogate identifier",
+          "primary_key": true,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "customer_id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Customer being onboarded",
+          "server_managed": true
+        },
+        {
+          "name": "identity_document_id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Document presented for this case",
+          "server_managed": true
+        },
+        {
+          "name": "source_of_funds",
+          "type": "enum:source_of_funds",
+          "nullable": false,
+          "classification": "Confidential",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Declared source of funds"
+        },
+        {
+          "name": "monthly_volume_usd",
+          "type": "numeric(14,2)",
+          "nullable": false,
+          "classification": "Confidential",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Expected monthly volume in USD (Q-013)"
+        },
+        {
+          "name": "is_pep_declared",
+          "type": "boolean",
+          "nullable": false,
+          "classification": "Confidential",
+          "personal_data": false,
+          "protection": "none",
+          "description": "PEP declaration made by the customer; screening may raise the PEP result but never lowers it (FR-005)"
+        },
+        {
+          "name": "is_face_to_face",
+          "type": "boolean",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "True if the customer was met in person"
+        },
+        {
+          "name": "status",
+          "type": "enum:case_status",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Current status; each change is a case_decision row",
+          "default": "'pending_review'",
+          "spec_refs": [
+            "BR-008"
+          ],
+          "server_managed": true
+        }
+      ],
+      "foreign_keys": [
+        {
+          "columns": [
+            "customer_id"
+          ],
+          "references_entity": "customer",
+          "references_columns": [
+            "id"
+          ],
+          "on_delete": "restrict"
+        },
+        {
+          "columns": [
+            "identity_document_id"
+          ],
+          "references_entity": "identity_document",
+          "references_columns": [
+            "id"
+          ],
+          "on_delete": "restrict"
+        }
+      ],
+      "indexes": [
+        {
+          "columns": [
+            "status"
+          ]
+        },
+        {
+          "columns": [
+            "customer_id"
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "name": "volume_not_negative",
+          "expression": "monthly_volume_usd >= 0"
+        }
+      ]
+    },
+    {
+      "name": "screening_check",
+      "description": "One sanctions and PEP screening of a name, attached to a case or run ad hoc. A result of unavailable is never read as no match.",
+      "classification": "Restricted",
+      "audit": false,
+      "rls": true,
+      "retention": "5 years after the customer relationship ends (proposed, Q-011)",
+      "spec_refs": [
+        "DM-003",
+        "BR-011"
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Surrogate identifier",
+          "primary_key": true,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "onboarding_case_id",
+          "type": "uuid",
+          "nullable": true,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Case screened; null for an ad-hoc check",
+          "server_managed": true
+        },
+        {
+          "name": "name_searched",
+          "type": "varchar(200)",
+          "nullable": false,
+          "classification": "Confidential",
+          "personal_data": true,
+          "protection": "encrypted_at_rest",
+          "description": "Name sent to the screening source",
+          "server_managed": true
+        },
+        {
+          "name": "source_version",
+          "type": "varchar(60)",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Version of the sanctions and PEP source (Q-006)",
+          "spec_refs": [
+            "DM-003"
+          ],
+          "server_managed": true
+        },
+        {
+          "name": "result",
+          "type": "enum:screening_result",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Outcome",
+          "spec_refs": [
+            "DM-003"
+          ],
+          "server_managed": true
+        },
+        {
+          "name": "screened_by_id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "User who ran it",
+          "server_managed": true
+        },
+        {
+          "name": "screened_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "When it ran",
+          "default": "now()",
+          "server_managed": true
+        }
+      ],
+      "foreign_keys": [
+        {
+          "columns": [
+            "onboarding_case_id"
+          ],
+          "references_entity": "onboarding_case",
+          "references_columns": [
+            "id"
+          ],
+          "on_delete": "restrict"
+        },
+        {
+          "columns": [
+            "screened_by_id"
+          ],
+          "references_entity": "app_user",
+          "references_columns": [
+            "id"
+          ],
+          "on_delete": "restrict"
+        }
+      ],
+      "indexes": [
+        {
+          "columns": [
+            "onboarding_case_id"
+          ]
+        },
+        {
+          "columns": [
+            "screened_at"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "risk_assessment",
+      "description": "One scoring of a case under a rule version. A case can be re-scored later; the latest sequence number is the current rating, shown everywhere (FR-014).",
+      "classification": "Confidential",
+      "audit": false,
+      "rls": true,
+      "retention": "5 years after the customer relationship ends (proposed, Q-011)",
+      "spec_refs": [
+        "BR-001",
+        "BR-003"
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Surrogate identifier",
+          "primary_key": true,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "onboarding_case_id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Case scored",
+          "server_managed": true
+        },
+        {
+          "name": "sequence_no",
+          "type": "smallint",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "1 for the first scoring, then 2, 3 and so on",
+          "server_managed": true
+        },
+        {
+          "name": "rule_set_id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Rule version used",
+          "spec_refs": [
+            "BR-001"
+          ],
+          "server_managed": true
+        },
+        {
+          "name": "score",
+          "type": "smallint",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Calculated score",
+          "spec_refs": [
+            "BR-001"
+          ],
+          "server_managed": true
+        },
+        {
+          "name": "rating",
+          "type": "enum:risk_rating",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Rating derived from the score",
+          "spec_refs": [
+            "BR-003"
+          ],
+          "server_managed": true
+        },
+        {
+          "name": "is_pep_applied",
+          "type": "boolean",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "True if the PEP points were applied, from declaration or screening",
+          "server_managed": true
+        },
+        {
+          "name": "assessed_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "When it was scored",
+          "default": "now()",
+          "server_managed": true
+        }
+      ],
+      "unique": [
+        [
+          "onboarding_case_id",
+          "sequence_no"
+        ]
+      ],
+      "foreign_keys": [
+        {
+          "columns": [
+            "onboarding_case_id"
+          ],
+          "references_entity": "onboarding_case",
+          "references_columns": [
+            "id"
+          ],
+          "on_delete": "restrict"
+        },
+        {
+          "columns": [
+            "rule_set_id"
+          ],
+          "references_entity": "risk_rule_set",
+          "references_columns": [
+            "id"
+          ],
+          "on_delete": "restrict"
+        }
+      ],
+      "checks": [
+        {
+          "name": "score_not_negative",
+          "expression": "score >= 0 AND sequence_no >= 1"
+        }
+      ]
+    },
+    {
+      "name": "case_decision",
+      "description": "Append-only history of every status change: who, when, action, old and new status and the mandatory note. The current decision is the latest row; nothing is overwritten.",
+      "classification": "Confidential",
+      "audit": false,
+      "rls": true,
+      "retention": "5 years after the relationship ends; never edited or deleted (proposed, Q-011, NF-004)",
+      "spec_refs": [
+        "DM-002",
+        "BR-009"
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Surrogate identifier",
+          "primary_key": true,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "onboarding_case_id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Case decided",
+          "server_managed": true
+        },
+        {
+          "name": "action",
+          "type": "enum:decision_action",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "What was decided",
+          "spec_refs": [
+            "DM-002"
+          ],
+          "server_managed": true
+        },
+        {
+          "name": "old_status",
+          "type": "enum:case_status",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Status before",
+          "server_managed": true
+        },
+        {
+          "name": "new_status",
+          "type": "enum:case_status",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Status after",
+          "server_managed": true
+        },
+        {
+          "name": "actor_id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Decider; the service rejects the case creator (BR-010)",
+          "spec_refs": [
+            "BR-009",
+            "BR-010"
+          ],
+          "server_managed": true
+        },
+        {
+          "name": "decided_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "When it was decided",
+          "default": "now()",
+          "server_managed": true
+        },
+        {
+          "name": "note",
+          "type": "text",
+          "nullable": false,
+          "classification": "Confidential",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Decision note, mandatory",
+          "server_managed": true
+        }
+      ],
+      "foreign_keys": [
+        {
+          "columns": [
+            "onboarding_case_id"
+          ],
+          "references_entity": "onboarding_case",
+          "references_columns": [
+            "id"
+          ],
+          "on_delete": "restrict"
+        },
+        {
+          "columns": [
+            "actor_id"
+          ],
+          "references_entity": "app_user",
+          "references_columns": [
+            "id"
+          ],
+          "on_delete": "restrict"
+        }
+      ],
+      "indexes": [
+        {
+          "columns": [
+            "onboarding_case_id",
+            "decided_at"
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "name": "note_present",
+          "expression": "length(btrim(note)) > 0",
+          "spec_refs": [
+            "BR-009"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "periodic_review",
+      "description": "A review of a customer that falls due after a decision, set from the rating (1, 2 or 3 years). Proposed (Q-004); could drive reminders later.",
+      "classification": "Confidential",
+      "audit": true,
+      "rls": true,
+      "retention": "5 years after the customer relationship ends (proposed, Q-011)",
+      "spec_refs": [
+        "BR-007"
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Surrogate identifier",
+          "primary_key": true,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "customer_id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Customer to review",
+          "server_managed": true
+        },
+        {
+          "name": "source_case_id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Case whose decision set this date",
+          "server_managed": true
+        },
+        {
+          "name": "due_date",
+          "type": "date",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "When the review is due",
+          "spec_refs": [
+            "BR-007"
+          ],
+          "server_managed": true
+        },
+        {
+          "name": "status",
+          "type": "enum:review_status",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "State of the review",
+          "default": "'scheduled'",
+          "server_managed": true
+        },
+        {
+          "name": "completed_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "When it was completed",
+          "server_managed": true
+        }
+      ],
+      "foreign_keys": [
+        {
+          "columns": [
+            "customer_id"
+          ],
+          "references_entity": "customer",
+          "references_columns": [
+            "id"
+          ],
+          "on_delete": "restrict"
+        },
+        {
+          "columns": [
+            "source_case_id"
+          ],
+          "references_entity": "onboarding_case",
+          "references_columns": [
+            "id"
+          ],
+          "on_delete": "restrict"
+        }
+      ],
+      "indexes": [
+        {
+          "columns": [
+            "due_date",
+            "status"
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "name": "completed_matches_status",
+          "expression": "(status = 'completed') = (completed_at IS NOT NULL)"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Sign in - KYC Desk</title>
+<link rel="stylesheet" href="css/style.css"></head>
+<body>
+<main style="max-width:380px;margin-top:90px">
+  <div class="card">
+    <h1>KYC Onboarding Desk</h1>
+    <label>Username <input id="u"></label>
+    <label>Password <input id="p" type="password"></label>
+    <button onclick="doLogin()">Sign in</button>
+    <p id="err" class="msg err"></p>
+    <p class="msg" style="color:#888">Test users: analyst1 / Welcome1, compliance1 / Compliance#2025</p>
+  </div>
+</main>
+<script src="js/auth.js"></script>
+<script>
+  function doLogin() {
+    if (login(document.getElementById("u").value, document.getElementById("p").value)) {
+      window.location.href = "index.html";
+    } else {
+      document.getElementById("err").textContent = "Wrong username or password";
+    }
+  }
+</script>
+</body></html>

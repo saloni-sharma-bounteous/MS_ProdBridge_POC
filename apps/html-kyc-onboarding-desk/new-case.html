@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>New customer - KYC Desk</title>
+<link rel="stylesheet" href="css/style.css"></head>
+<body>
+<div id="nav"></div>
+<main>
+  <h1>New customer onboarding</h1>
+  <div class="card">
+    <div class="form-grid">
+      <label>Full name <input id="fullName"></label>
+      <label>Date of birth <input id="dob" type="date"></label>
+      <label>Nationality (ISO code) <input id="nationality" maxlength="2" placeholder="GB"></label>
+      <label>Country of residence <input id="residenceCountry" maxlength="2" placeholder="GB"></label>
+      <label>ID type
+        <select id="idType"><option value="passport">Passport</option><option value="national_id">National ID</option><option value="driving_licence">Driving licence</option></select></label>
+      <label>ID number <input id="idNumber"></label>
+      <label>ID expiry <input id="idExpiry" type="date"></label>
+      <label>Occupation
+        <select id="occupation"><option value="engineer">Engineer</option><option value="teacher">Teacher</option><option value="government_official">Government official</option>
+          <option value="casino">Casino / gaming</option><option value="money_service">Money service business</option><option value="car_dealer">Car dealer</option><option value="jewellery">Jewellery / precious metals</option><option value="other">Other</option></select></label>
+      <label>Source of funds
+        <select id="sourceOfFunds"><option value="salary">Salary</option><option value="business">Business income</option><option value="inheritance">Inheritance</option><option value="other">Other</option><option value="unknown">Unknown</option></select></label>
+      <label>Expected monthly volume (USD) <input id="monthlyVolume" type="number"></label>
+      <label>Politically exposed person?
+        <select id="isPEP"><option value="false">No</option><option value="true">Yes</option></select></label>
+      <label>Met face to face?
+        <select id="faceToFace"><option value="true">Yes</option><option value="false">No (remote)</option></select></label>
+    </div>
+    <button onclick="submitCase()">Run checks and create case</button>
+    <p id="msg" class="msg"></p>
+  </div>
+</main>
+<script src="js/auth.js"></script><script src="js/store.js"></script><script src="js/risk.js"></script><script src="js/screening.js"></script><script src="js/nav.js"></script>
+<script>
+  requireLogin(); renderNav();
+  function v(id) { return document.getElementById(id).value; }
+
+  function submitCase() {
+    var msg = document.getElementById("msg");
+    msg.className = "msg err";
+    if (!v("fullName") || !v("dob") || !v("idNumber") || !v("idExpiry")) { msg.textContent = "Name, date of birth and ID details are required"; return; }
+
+    var age = (Date.now() - new Date(v("dob")).getTime()) / (365.25 * 24 * 3600 * 1000);
+    if (age < 18) { msg.textContent = "Customer must be 18 or older"; return; }
+    if (new Date(v("idExpiry")) < new Date()) { msg.textContent = "ID document has expired"; return; }
+
+    var c = {
+      fullName: v("fullName"), dob: v("dob"), nationality: v("nationality").toUpperCase(),
+      residenceCountry: v("residenceCountry").toUpperCase(), idType: v("idType"), idNumber: v("idNumber"),
+      idExpiry: v("idExpiry"), occupation: v("occupation"), sourceOfFunds: v("sourceOfFunds"),
+      monthlyVolume: Number(v("monthlyVolume")) || 0, isPEP: v("isPEP") === "true", faceToFace: v("faceToFace") === "true",
+      createdBy: currentUser().name
+    };
+
+    var scr = screenName(c.fullName);
+    if (scr.pep) c.isPEP = true;
+    var r = scoreCase(c);
+    c.score = r.score; c.rating = r.rating;
+    c.screening = scr;
+
+    if (scr.sanctioned) c.status = "blocked";
+    else if (r.rating === "Low") c.status = "approved";   // analyst auto-approve for low risk
+    else c.status = "pending_review";
+
+    var saved = addCase(c);
+    window.location.href = "case.html?id=" + saved.id;
+  }
+</script>
+</body></html>

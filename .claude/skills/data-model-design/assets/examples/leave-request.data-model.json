@@ -1,0 +1,734 @@
+{
+  "schema_version": "1.0",
+  "model": {
+    "name": "leave-requests",
+    "description": "Target model for the leave request tracker: employees, entitlements, requests and approvals.",
+    "dialect": "postgresql",
+    "version": "0.1",
+    "source_spec": "handoff/spec"
+  },
+  "enums": [
+    {
+      "name": "leave_type",
+      "values": [
+        "annual",
+        "sick",
+        "parental"
+      ],
+      "description": "Kinds of leave an employee can request",
+      "spec_refs": [
+        "REQ-0100 BR-1"
+      ]
+    },
+    {
+      "name": "request_status",
+      "values": [
+        "pending",
+        "approved",
+        "rejected",
+        "cancelled"
+      ],
+      "description": "Lifecycle of a leave request",
+      "spec_refs": [
+        "REQ-0100 FR-2"
+      ]
+    },
+    {
+      "name": "approval_role",
+      "values": [
+        "manager",
+        "hr"
+      ],
+      "description": "Who gave an approval",
+      "spec_refs": [
+        "REQ-0100 BR-2"
+      ]
+    },
+    {
+      "name": "approval_decision",
+      "values": [
+        "approved",
+        "rejected"
+      ],
+      "description": "Outcome of one approval step",
+      "spec_refs": [
+        "REQ-0100 BR-2"
+      ]
+    }
+  ],
+  "entities": [
+    {
+      "name": "employee",
+      "description": "A person who can request or approve leave; identity comes from the company directory.",
+      "classification": "Restricted",
+      "audit": true,
+      "rls": true,
+      "retention": "6 years after employment ends",
+      "spec_refs": [
+        "REQ-0100 NFR-1"
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Surrogate identifier",
+          "primary_key": true,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "directory_subject",
+          "type": "varchar(100)",
+          "nullable": false,
+          "classification": "Confidential",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Subject id from the company identity provider",
+          "server_managed": true
+        },
+        {
+          "name": "full_name",
+          "type": "varchar(200)",
+          "nullable": false,
+          "classification": "Restricted",
+          "personal_data": true,
+          "protection": "encrypted_at_rest",
+          "description": "Employee display name",
+          "server_managed": true
+        },
+        {
+          "name": "work_email",
+          "type": "varchar(200)",
+          "nullable": false,
+          "classification": "Confidential",
+          "personal_data": true,
+          "protection": "none",
+          "description": "Work email address",
+          "server_managed": true
+        },
+        {
+          "name": "manager_id",
+          "type": "uuid",
+          "nullable": true,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "The employee's line manager",
+          "server_managed": true
+        }
+      ],
+      "unique": [
+        [
+          "directory_subject"
+        ]
+      ],
+      "foreign_keys": [
+        {
+          "columns": [
+            "manager_id"
+          ],
+          "references_entity": "employee",
+          "references_columns": [
+            "id"
+          ],
+          "on_delete": "set null"
+        }
+      ]
+    },
+    {
+      "name": "leave_policy",
+      "description": "Annual allowance and approval limit per leave type; governed reference data owned by People Operations.",
+      "classification": "Internal",
+      "audit": true,
+      "reference_data": true,
+      "spec_refs": [
+        "REQ-0100 BR-1",
+        "REQ-0100 BR-2"
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Surrogate identifier",
+          "primary_key": true,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "leave_type",
+          "type": "enum:leave_type",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Leave type this row governs",
+          "spec_refs": [
+            "REQ-0100 BR-1"
+          ]
+        },
+        {
+          "name": "annual_allowance_days",
+          "type": "numeric(5,1)",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Days allowed per year",
+          "spec_refs": [
+            "REQ-0100 BR-1"
+          ]
+        },
+        {
+          "name": "manager_limit_days",
+          "type": "numeric(5,1)",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Longest request a manager may approve alone",
+          "spec_refs": [
+            "REQ-0100 BR-2"
+          ]
+        }
+      ],
+      "unique": [
+        [
+          "leave_type"
+        ]
+      ],
+      "checks": [
+        {
+          "name": "limits_positive",
+          "expression": "annual_allowance_days > 0 AND manager_limit_days > 0"
+        }
+      ],
+      "seed": [
+        {
+          "leave_type": "annual",
+          "annual_allowance_days": 25,
+          "manager_limit_days": 10
+        },
+        {
+          "leave_type": "sick",
+          "annual_allowance_days": 10,
+          "manager_limit_days": 10
+        },
+        {
+          "leave_type": "parental",
+          "annual_allowance_days": 90,
+          "manager_limit_days": 10
+        }
+      ]
+    },
+    {
+      "name": "leave_balance",
+      "description": "Entitlement and used days per employee, leave type and year.",
+      "classification": "Confidential",
+      "audit": true,
+      "rls": true,
+      "retention": "6 years after employment ends",
+      "spec_refs": [
+        "REQ-0100 BR-1"
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Surrogate identifier",
+          "primary_key": true,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "employee_id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Owner of the balance",
+          "server_managed": true
+        },
+        {
+          "name": "leave_type",
+          "type": "enum:leave_type",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Leave type",
+          "server_managed": true
+        },
+        {
+          "name": "balance_year",
+          "type": "smallint",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Calendar year",
+          "server_managed": true
+        },
+        {
+          "name": "entitlement_days",
+          "type": "numeric(5,1)",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Days available this year",
+          "server_managed": true
+        },
+        {
+          "name": "used_days",
+          "type": "numeric(5,1)",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Days already approved",
+          "default": "0",
+          "server_managed": true
+        }
+      ],
+      "unique": [
+        [
+          "employee_id",
+          "leave_type",
+          "balance_year"
+        ]
+      ],
+      "foreign_keys": [
+        {
+          "columns": [
+            "employee_id"
+          ],
+          "references_entity": "employee",
+          "references_columns": [
+            "id"
+          ],
+          "on_delete": "restrict"
+        }
+      ],
+      "checks": [
+        {
+          "name": "used_within_entitlement",
+          "expression": "used_days <= entitlement_days",
+          "spec_refs": [
+            "REQ-0100 BR-1"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leave_request",
+      "description": "One request for leave, with its dates, type, status and the details HR needs.",
+      "classification": "Restricted",
+      "audit": true,
+      "rls": true,
+      "retention": "6 years after employment ends",
+      "spec_refs": [
+        "REQ-0100 FR-2",
+        "REQ-0100 NFR-1"
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Surrogate identifier",
+          "primary_key": true,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "employee_id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Requester; taken from the authenticated user, never from the request body",
+          "server_managed": true
+        },
+        {
+          "name": "leave_type",
+          "type": "enum:leave_type",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Kind of leave"
+        },
+        {
+          "name": "from_date",
+          "type": "date",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "First day of leave"
+        },
+        {
+          "name": "to_date",
+          "type": "date",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Last day of leave"
+        },
+        {
+          "name": "working_days",
+          "type": "numeric(5,1)",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Working days counted, excluding weekends and public holidays",
+          "spec_refs": [
+            "REQ-0100 BR-7"
+          ],
+          "server_managed": true
+        },
+        {
+          "name": "status",
+          "type": "enum:request_status",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Current status",
+          "default": "'pending'",
+          "server_managed": true
+        },
+        {
+          "name": "needs_hr_approval",
+          "type": "boolean",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "True when the request is longer than the manager limit",
+          "default": "false",
+          "spec_refs": [
+            "REQ-0100 BR-2"
+          ],
+          "server_managed": true
+        },
+        {
+          "name": "medical_note",
+          "type": "text",
+          "nullable": true,
+          "classification": "Restricted",
+          "personal_data": true,
+          "protection": "encrypted_at_rest",
+          "description": "Medical details for sick leave; visible to HR only",
+          "spec_refs": [
+            "REQ-0100 BR-4"
+          ]
+        },
+        {
+          "name": "home_address",
+          "type": "text",
+          "nullable": true,
+          "classification": "Restricted",
+          "personal_data": true,
+          "protection": "encrypted_at_rest",
+          "description": "Home address, collected for parental leave only",
+          "spec_refs": [
+            "REQ-0100 BR-5"
+          ]
+        }
+      ],
+      "foreign_keys": [
+        {
+          "columns": [
+            "employee_id"
+          ],
+          "references_entity": "employee",
+          "references_columns": [
+            "id"
+          ],
+          "on_delete": "restrict"
+        }
+      ],
+      "indexes": [
+        {
+          "columns": [
+            "status"
+          ]
+        },
+        {
+          "columns": [
+            "employee_id",
+            "from_date"
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "name": "dates_in_order",
+          "expression": "to_date >= from_date"
+        },
+        {
+          "name": "address_only_parental",
+          "expression": "home_address IS NULL OR leave_type = 'parental'",
+          "spec_refs": [
+            "REQ-0100 BR-5"
+          ]
+        },
+        {
+          "name": "medical_only_sick",
+          "expression": "medical_note IS NULL OR leave_type = 'sick'",
+          "spec_refs": [
+            "REQ-0100 BR-4"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leave_approval",
+      "description": "One approval step on a request; a request over the manager limit has a manager step and an HR step.",
+      "classification": "Confidential",
+      "audit": false,
+      "rls": true,
+      "retention": "6 years after employment ends",
+      "spec_refs": [
+        "REQ-0100 BR-2",
+        "REQ-0100 BR-3",
+        "REQ-0100 BR-6"
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Surrogate identifier",
+          "primary_key": true,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "leave_request_id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Request being decided",
+          "server_managed": true
+        },
+        {
+          "name": "approver_id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Employee who decided",
+          "spec_refs": [
+            "REQ-0100 BR-6"
+          ],
+          "server_managed": true
+        },
+        {
+          "name": "approval_role",
+          "type": "enum:approval_role",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Capacity in which they decided",
+          "server_managed": true
+        },
+        {
+          "name": "decision",
+          "type": "enum:approval_decision",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Outcome of this step",
+          "server_managed": true
+        },
+        {
+          "name": "decided_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "When the decision was made",
+          "default": "now()",
+          "spec_refs": [
+            "REQ-0100 BR-6"
+          ],
+          "server_managed": true
+        },
+        {
+          "name": "comment",
+          "type": "text",
+          "nullable": true,
+          "classification": "Confidential",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Optional reason"
+        }
+      ],
+      "unique": [
+        [
+          "leave_request_id",
+          "approver_id"
+        ],
+        [
+          "leave_request_id",
+          "approval_role"
+        ]
+      ],
+      "foreign_keys": [
+        {
+          "columns": [
+            "leave_request_id"
+          ],
+          "references_entity": "leave_request",
+          "references_columns": [
+            "id"
+          ],
+          "on_delete": "cascade"
+        },
+        {
+          "columns": [
+            "approver_id"
+          ],
+          "references_entity": "employee",
+          "references_columns": [
+            "id"
+          ],
+          "on_delete": "restrict"
+        }
+      ]
+    },
+    {
+      "name": "audit_log",
+      "description": "Append-only record of every create, change, approval and export.",
+      "classification": "Restricted",
+      "audit": false,
+      "rls": true,
+      "retention": "6 years after employment ends",
+      "spec_refs": [
+        "REQ-0100 BR-6"
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Surrogate identifier",
+          "primary_key": true,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "entity_name",
+          "type": "varchar(60)",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Table the action touched",
+          "server_managed": true
+        },
+        {
+          "name": "entity_id",
+          "type": "uuid",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "Row the action touched",
+          "server_managed": true
+        },
+        {
+          "name": "action",
+          "type": "varchar(30)",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "What happened, for example create, update, approve, export",
+          "server_managed": true
+        },
+        {
+          "name": "actor",
+          "type": "varchar(100)",
+          "nullable": false,
+          "classification": "Confidential",
+          "personal_data": true,
+          "protection": "none",
+          "description": "Identity of the user or service",
+          "server_managed": true
+        },
+        {
+          "name": "occurred_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "classification": "Internal",
+          "personal_data": false,
+          "protection": "none",
+          "description": "When it happened",
+          "default": "now()",
+          "server_managed": true
+        },
+        {
+          "name": "before_state",
+          "type": "jsonb",
+          "nullable": true,
+          "classification": "Restricted",
+          "personal_data": true,
+          "protection": "encrypted_at_rest",
+          "description": "Values before the change",
+          "server_managed": true
+        },
+        {
+          "name": "after_state",
+          "type": "jsonb",
+          "nullable": true,
+          "classification": "Restricted",
+          "personal_data": true,
+          "protection": "encrypted_at_rest",
+          "description": "Values after the change",
+          "server_managed": true
+        }
+      ],
+      "indexes": [
+        {
+          "columns": [
+            "entity_name",
+            "entity_id"
+          ]
+        },
+        {
+          "columns": [
+            "occurred_at"
+          ]
+        }
+      ]
+    }
+  ]
+}
