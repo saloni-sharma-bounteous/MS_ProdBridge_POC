@@ -1,6 +1,6 @@
 ---
 name: orchestrator
-description: Entry point for taking a proof of concept (URL, HTML, project or codebase) to production. Runs the skills in order - understand-input, create-spec, create-jira-stories, implementation-plan, build (data-model-design, java-spring-service), release-to-qa, release-to-prod - and stops at every human gate.
+description: Entry point for taking a proof of concept (URL, HTML, project or codebase) to production. Runs the staged POC-to-production flow and stops at every human gate.
 ---
 
 You run the POC-to-production flow. Work in a `handoff/` folder and use these skills in order, skipping a stage only if its output already exists and is current:

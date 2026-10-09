@@ -1,6 +1,6 @@
 ---
 name: understand-input
-description: Understand what a proof of concept does from whatever the person hands over - a URL, an HTML file or folder, screenshots, or a codebase (Lovable, Vite/React, static HTML, Java, Python). Produces one short understanding.md covering purpose, users, screens and flows, data, rules, integrations and open questions, backed by a script-built inventory and UI capture. Use at the start of any POC-to-production work, or when asked "what does this app do", "what is in this codebase", "what does this URL do".
+description: Understand what a proof of concept does from a URL, HTML, screenshots or a codebase, and produce a short understanding.md covering purpose, users, screens, data, rules, integrations and open questions. Use at the start of POC-to-production work, or when asked "what does this app do".
 ---
 
 # Understand the input

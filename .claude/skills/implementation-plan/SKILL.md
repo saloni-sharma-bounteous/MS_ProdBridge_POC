@@ -1,6 +1,6 @@
 ---
 name: implementation-plan
-description: Turn approved Jira stories (handoff/stories.json) into a short implementation plan - stack decisions, ordered waves of work, the critical path, and for each story the skill or step to use to build it. Use after create-jira-stories is approved, when asked "make an implementation plan", "what order do we build this in", "plan the build".
+description: Turn approved Jira stories (handoff/stories.json) into a short implementation plan: stack decisions, ordered waves, critical path, and the skill or step for each story. Use after create-jira-stories, or when asked "what order do we build this in".
 ---
 
 # Implementation plan

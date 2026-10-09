@@ -1,6 +1,6 @@
 ---
 name: data-model-design
-description: Design the target data model for an application from its specification, producing a validated, machine-readable model with entities, attributes, keys, constraints, enums, data classification, protection and retention, then generate PostgreSQL DDL, an entity-relationship diagram and a migration plan from what exists today. Use when a spec, requirement or as-built spec says what the data is and someone asks "what should the data model look like", "design the schema", "turn this spec into tables", "what do we need to change in the database", or before writing a backend service. Works for any domain; every entity and rule traces back to a spec statement or requirement.
+description: Design a target data model from a spec: entities, keys, constraints, enums, data classification and retention, then generate PostgreSQL DDL, an ER diagram and a migration plan. Use when asked to "design the schema", "turn this spec into tables", or before writing a backend service.
 ---
 
 # Data model design

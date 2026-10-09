@@ -1,6 +1,6 @@
 ---
 name: create-spec
-description: Write a short, straightforward specification for the production version of an app from handoff/understanding.md (and any requirement text). One file, spec.md, with only what engineers and the business need - scope, actors, numbered functional requirements, business rules, data, screens, integrations, non-functional needs, out of scope and open questions. Use after understand-input, or when asked "write the spec", "create specs from this POC", "what are we building".
+description: Write a short specification for the production version of an app from handoff/understanding.md: scope, actors, numbered requirements, business rules, data, screens, integrations, non-functional needs, out of scope and open questions. Use after understand-input, or when asked to "write the spec" or "what are we building".
 ---
 
 # Create the spec

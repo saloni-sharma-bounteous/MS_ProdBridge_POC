@@ -1,6 +1,6 @@
 ---
 name: project-mindmap
-description: Build a visual mindmap of the current project showing every component, what it does, and how the components work together, then render it with the Playwright MCP and save a PNG. Use this whenever the user asks for a mindmap, architecture map, project overview, component diagram, "how does this project work", or wants to visualize or explain the codebase, even if they do not say "mindmap".
+description: Build a visual mindmap of the current project showing its components, what each does and how they interact, rendered with the Playwright MCP and saved as a PNG. Use when asked for a mindmap, architecture map, component diagram or project overview.
 ---
 
 # Project mindmap

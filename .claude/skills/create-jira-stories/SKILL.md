@@ -1,6 +1,6 @@
 ---
 name: create-jira-stories
-description: Turn handoff/spec.md into Jira epics and stories with Given/When/Then acceptance criteria, priority, size and dependencies, then optionally create them in Jira. Produces stories.json and can import it with the included script. Use after create-spec when asked to "create Jira stories", "turn the spec into a backlog", "import into Jira".
+description: Turn handoff/spec.md into Jira epics and stories with Given/When/Then acceptance criteria, priority, size and dependencies, producing stories.json and optionally importing it into Jira. Use after create-spec, or when asked to "create Jira stories" or "import into Jira".
 ---
 
 # Create Jira stories

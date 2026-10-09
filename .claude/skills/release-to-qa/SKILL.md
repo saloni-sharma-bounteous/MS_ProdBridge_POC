@@ -1,6 +1,6 @@
 ---
 name: release-to-qa
-description: Move a built service to a QA environment and prove it meets the approved acceptance criteria - build and test, container image, database migrations, deploy to QA, Playwright tests mapped to each acceptance criterion, and a QA report with a sign-off. Use after implementation, when asked to "move to QA", "test this before release", "write Playwright tests for the stories", "is it ready for QA".
+description: Deploy a built service to QA and prove it meets the approved acceptance criteria: build and test, container image, migrations, Playwright tests per criterion, and a QA report with sign-off. Use after implementation, or when asked to "move to QA" or "write Playwright tests for the stories".
 ---
 
 # Release to QA

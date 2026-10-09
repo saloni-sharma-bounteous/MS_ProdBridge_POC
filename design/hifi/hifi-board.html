@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KYC Desk: Hi-fi board</title>
+<link rel="stylesheet" href="../design-system.css">
+<style>
+:root{--accent:#0E6B72;--accent-ink:#fff;--accent-tint:rgba(14,107,114,.12)}
+[data-theme=dark]{--accent:#4FC3CB;--accent-ink:#00282B;--accent-tint:rgba(79,195,203,.18)}
+.board{flex-direction:column;align-items:flex-start;gap:72px;padding:72px}
+/* desktop window */
+.win{width:1440px;height:900px;border-radius:14px;background:var(--bg);color:var(--label);font-family:var(--font);display:flex;overflow:hidden;position:relative;flex:none;box-shadow:0 0 0 .5px rgba(16,24,40,.18),0 30px 80px rgba(16,24,40,.22)}
+.win *{box-sizing:border-box}
+.side{width:240px;flex:none;background:var(--surface);border-right:.5px solid var(--sep);padding:24px 16px;display:flex;flex-direction:column;gap:4px}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px 24px;font-size:17px;font-weight:700;letter-spacing:-.3px}
+.nav-i{height:44px;border-radius:var(--r-sm);padding:0 12px;display:flex;align-items:center;gap:12px;font-size:15px;font-weight:500;color:var(--label-2);letter-spacing:-.24px}
+.nav-i.on{background:var(--accent-tint);color:var(--accent);font-weight:600}
+.nav-i .badge{margin-left:auto;font-size:12px;font-weight:600;background:var(--accent);color:var(--accent-ink);border-radius:99px;padding:1px 8px}
+.me{margin-top:auto;display:flex;gap:10px;align-items:center;padding:12px 8px 0;border-top:.5px solid var(--sep)}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.top{height:56px;flex:none;padding:0 32px;display:flex;align-items:center;gap:16px;border-bottom:.5px solid var(--sep);background:var(--glass);backdrop-filter:blur(24px) saturate(180%)}
+.top .search{width:360px}
+.page{flex:1;min-height:0;padding:28px 32px;display:flex;flex-direction:column;gap:20px;overflow:hidden}
+.crumb{font-size:13px;color:var(--label-2);display:flex;gap:6px;align-items:center}
+.hd{display:flex;align-items:flex-end;gap:16px}
+.hd .grow{flex:1}
+.btn.w{width:auto;padding:0 20px;height:44px}
+.btn.sec{background:var(--fill);color:var(--label)}
+.btn[disabled],.btn.off{background:var(--fill);color:var(--label-3);box-shadow:none;cursor:not-allowed}
+.btn.danger{background:var(--bad-tint);color:var(--bad)}
+.stats{display:flex;gap:16px}
+.stat .l{font-size:13px;color:var(--label-2)}
+.stat.hero{background:var(--accent);color:var(--accent-ink)}
+.stat.hero .l{color:inherit;opacity:.85}
+.stat .n{font-variant-numeric:tabular-nums}
+.stat .d{font-size:13px;color:var(--label-2)}
+.tbl{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-1);overflow:hidden}
+.tr{display:grid;gap:16px;align-items:center;padding:0 20px;min-height:60px;border-top:.5px solid var(--sep);font-size:15px;letter-spacing:-.24px}
+.tr.h{min-height:44px;border-top:0;background:var(--surface-2);font-size:12px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--label-2)}
+.tr:not(.h):hover{background:var(--surface-2)}
+.tr .id{font-variant-numeric:tabular-nums;font-weight:600}
+.tr .sub{font-size:13px;color:var(--label-2)}
+.lock{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--label-2)}
+.lock .i{width:15px;height:15px}
+.chip.accent{background:var(--accent-tint);color:var(--accent)}
+.sk{border-radius:6px;background:linear-gradient(90deg,var(--fill),var(--surface-2),var(--fill));height:12px}
+.cols{display:flex;gap:24px;align-items:flex-start;min-height:0}
+.col{display:flex;flex-direction:column;gap:20px;min-width:0}
+.panel{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-1);padding:20px;display:flex;flex-direction:column;gap:16px}
+.panel h3{margin:0;font-size:17px;line-height:22px;font-weight:600;letter-spacing:-.41px}
+.panel .sub{font-size:13px;color:var(--label-2)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px 16px}
+.field.err{box-shadow:0 0 0 1.5px var(--bad)}
+.field .v{font-size:17px;letter-spacing:-.41px;min-height:22px}
+.field .v.ph{color:var(--label-3)}
+.field .m{font-size:12px;color:var(--bad);margin-top:4px;display:flex;gap:4px;align-items:center}
+.kv dt{font-size:12px;color:var(--label-2)}.kv dd{margin:2px 0 0;font-size:15px;font-weight:500}
+.kv{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin:0}.kv div{min-width:0}
+.mask{font-variant-numeric:tabular-nums;letter-spacing:1px}
+.band{position:relative;height:12px;border-radius:6px;display:flex;overflow:hidden;background:var(--fill)}
+.band i{display:block;height:100%}
+.band .lo{width:25%;background:var(--good-tint)}.band .md{width:25%;background:var(--warn-tint)}.band .hi{width:50%;background:var(--bad-tint)}
+.band .fillbar{position:absolute;left:0;top:0;height:100%;border-radius:6px}
+.band-l{display:flex;font-size:12px;color:var(--label-2)}
+.fx{display:flex;align-items:center;gap:12px;font-size:15px;padding:10px 0;border-top:.5px solid var(--sep)}
+.fx:first-child{border-top:0}.fx .grow{flex:1}.fx .pts{font-weight:700;font-variant-numeric:tabular-nums}
+.tl{display:flex;flex-direction:column;gap:14px}
+.tl div{display:flex;gap:12px;font-size:14px;line-height:19px}
+.tl .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);margin-top:6px;flex:none}
+.tl small{display:block;color:var(--label-2);font-size:12px}
+.note-area{border-radius:var(--r-md);background:var(--surface-2);padding:12px 14px;min-height:96px;font-size:15px;color:var(--label-3);box-shadow:inset 0 0 0 .5px var(--sep)}
+.note-area.err{box-shadow:inset 0 0 0 1.5px var(--bad)}
+.why{display:flex;gap:8px;font-size:13px;color:var(--label-2);align-items:flex-start}.why .i{width:16px;height:16px;flex:none;margin-top:1px}
+.callout{border-radius:var(--r-md);padding:12px 14px;display:flex;gap:10px;font-size:14px;line-height:19px;align-items:flex-start}
+.callout .i{width:20px;height:20px;flex:none}
+.callout.bad{background:var(--bad-tint);color:var(--bad)}.callout.warn{background:var(--warn-tint);color:var(--warn)}.callout.info{background:var(--fill);color:var(--label-2)}
+.callout b{display:block;color:var(--label)}
+.signin{display:flex;width:100%}
+.signin .art{flex:1;background:radial-gradient(120% 90% at 20% 10%,#17A2A8 0%,#0E6B72 45%,#0A3F52 100%);color:#fff;padding:64px;display:flex;flex-direction:column;justify-content:flex-end;gap:16px;position:relative;overflow:hidden}
+.signin .art::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.05) 0 1px,transparent 1px 36px)}
+.signin .art>*{position:relative}
+.signin .form{width:560px;background:var(--surface);padding:0 88px;display:flex;flex-direction:column;justify-content:center;gap:20px}
+.frame-label{font-size:16px}
+.state-card{flex:1;background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-1);padding:24px;display:flex;flex-direction:column;gap:14px;min-height:420px}
+.empty-art{width:72px;height:72px;border-radius:22px;background:var(--accent-tint);color:var(--accent);display:grid;place-items:center}
+.empty-art .i{width:34px;height:34px}
+.mono{font-variant-numeric:tabular-nums}
+</style></head>
+<body style="margin:0">
+<!-- icon sprite (inlined) -->
+<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+  <symbol id="i-chev-r" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+  <symbol id="i-chev-l" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5.2c0 4.4-2.9 8-7 9.8-4.1-1.8-7-5.4-7-9.8V6z"/><path d="M8.7 12l2.3 2.3 4.3-4.6"/></symbol>
+  <symbol id="i-tray" viewBox="0 0 24 24"><path d="M4 13l2.6-7.2A1.5 1.5 0 018 5h8a1.5 1.5 0 011.4.8L20 13v5a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 014 18z"/><path d="M4 13h4.5l1 2.5h5l1-2.5H20"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M5 20v-8M12 20V4M19 20v-5"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M7 3.5h6.5L19 9v10.5a1 1 0 01-1 1H7a1 1 0 01-1-1v-15a1 1 0 011-1z"/><path d="M13.5 3.5V9H19"/></symbol>
+  <symbol id="i-id" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><circle cx="9" cy="11" r="2"/><path d="M6.2 16c.6-1.4 1.6-2 2.8-2s2.2.6 2.8 2M14.5 10.5h4M14.5 14h3"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 1112 0v5.5l1.5 1.5h-15z"/><path d="M10 20.5a2.2 2.2 0 004 0"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M6 21V4M6 5h11l-2 4 2 4H6"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20c1-3.8 4-5.5 7.5-5.5s6.5 1.7 7.5 5.5"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="9.5" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 017 0v2.5"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4l9 15.5H3z"/><path d="M12 10v4.5M12 17.2v.1"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V5M7.5 9.5L12 5l4.5 4.5M5 19h14"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14"/></symbol>
+  <symbol id="i-retry" viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 11-2.4-5.5M19.5 4.5v4h-4"/></symbol>
+</svg>
+<div class="board" id="board"></div>
+<script>
+function ic(n,cls){return '<svg class="i '+(cls||'')+'"><use href="#i-'+n+'"/></svg>'}
+function chip(t,k){return '<span class="chip '+k+'">'+t+'</span>'}
+var RC={Low:'good',Medium:'warn',High:'bad'};
+function rating(r){return chip(r,RC[r])}
+var STC={'Pending review':'warn','Escalated':'bad','Approved':'good','Rejected':'neutral','Blocked':'bad'};
+function status(s){return chip(s,STC[s])}
+function av(t,c){return '<div class="avatar" style="'+(c||'')+'">'+t+'</div>'}
+function nav(active,count){
+  var items=[['tray','Review queue',count],['plus','New customer'],['shield','Screening'],['chart','Reports'],['doc','Audit log']];
+  return '<div class="side"><div class="brand"><div class="tile" style="width:32px;height:32px">'+ic('shield')+'</div>KYC Desk</div>'+
+  items.map(function(x){return '<div class="nav-i'+(x[1]===active?' on':'')+'">'+ic(x[0])+x[1]+(x[2]?'<span class="badge">'+x[2]+'</span>':'')+'</div>'}).join('')+
+  '<div class="me">'+av('AO')+'<div><div style="font-size:15px;font-weight:600">Amara Okafor</div><div class="sub" style="font-size:13px;color:var(--label-2)">Compliance Officer</div></div></div></div>';
+}
+function win(active,body,opt){opt=opt||{};
+  return '<div class="win" '+(opt.dark?'data-theme="dark"':'')+'>'+nav(active,opt.count)+'<div class="main"><div class="top"><div class="search">'+ic('search')+'Search case id or customer</div><div style="flex:1"></div>'+ic('bell')+'</div><div class="page">'+body+'</div></div></div>';
+}
+function frame(name,inner,tag){return '<div class="frame" data-figma-name="'+name+'"><div class="frame-label">'+name+'<span>'+(tag||'Hi-fi')+'</span></div>'+inner+'</div>'}
+function th(cols,names){return '<div class="tr h" style="grid-template-columns:'+cols+'">'+names.map(function(n){return '<span>'+n+'</span>'}).join('')+'</div>'}
+function tr(cols,cells){return '<div class="tr" style="grid-template-columns:'+cols+'">'+cells.join('')+'</div>'}
+var out=[];
+
+/* 01 Sign in */
+out.push(frame('01 / Sign in','<div class="win"><div class="signin"><div class="art"><div class="tile" style="width:48px;height:48px;background:rgba(255,255,255,.18);border-radius:14px">'+ic('shield')+'</div><div class="t-large" style="font-size:44px;line-height:50px;max-width:560px;letter-spacing:-.5px">Know every customer before you onboard them.</div><div class="t-body" style="opacity:.85;max-width:460px">One rating, one approval path, one audit trail.</div></div>'+
+ '<div class="form"><div><div class="t-title1">Sign in</div><div class="t-callout t-2" style="margin-top:8px">Use your bank account. Your role comes from the directory.</div></div><button class="btn primary" style="height:52px">'+ic('lock')+'Continue with bank SSO</button><div class="t-foot t-3">Access is logged. Unauthorised use is a breach of policy.</div></div></div></div>'));
+
+/* 02 Queue */
+var qc='110px 1.5fr 110px 150px 190px 100px 120px';
+var rows=[
+ ['KYC-10003','Elena Vasquez-Ruiz','VE &middot; Passport','High','Escalated','Compliance Officer','04 Feb','review'],
+ ['KYC-10002','Marcus Oyelaran','NG &middot; National ID','Medium','Pending review','Senior Analyst','03 Feb','review'],
+ ['KYC-10007','Tomasz Kowalczyk-Brandstetter','PL &middot; Passport','Medium','Pending review','Senior Analyst','03 Feb','mine'],
+ ['KYC-10006','Ngozi Adebayo-Thornton','GB &middot; Driving licence','Low','Approved','Automatic','02 Feb',''],
+ ['KYC-10004','Dmitri Ivanov','RU &middot; Passport','High','Blocked','Compliance (reported)','01 Feb','']];
+out.push(frame('02 / Review queue',win('Review queue',
+ '<div class="hd"><div class="grow"><div class="t-title1">Review queue</div><div class="t-callout t-2">3 cases need a decision from you</div></div><button class="btn primary w">'+ic('plus')+'New customer</button></div>'+
+ '<div class="stats"><div class="card stat hero"><span class="l">Awaiting decision</span><span class="n">7</span><span class="d" style="color:inherit;opacity:.85">3 are yours to decide</span></div><div class="card stat"><span class="l">High risk</span><span class="n">2</span><span class="d">1 escalated</span></div><div class="card stat"><span class="l">Blocked by screening</span><span class="n">1</span><span class="d">Reported to Compliance</span></div><div class="card stat"><span class="l">Reviews due this month</span><span class="n">4</span><span class="d">Tasks sent to analysts</span></div></div>'+
+ '<div class="hd"><div class="seg" style="width:440px"><span class="on">Needs my decision</span><span>All open</span><span>Decided</span><span>Blocked</span></div><div class="grow"></div><button class="btn sec sm">Rating: Any</button><button class="btn sec sm">Created: Last 30 days</button></div>'+
+ '<div class="tbl">'+th(qc,['Case','Customer','Rating','Status','Approver needed','Created',''])+
+ rows.map(function(r){return tr(qc,['<span class="id">'+r[0]+'</span>','<div><div style="font-weight:600">'+r[1]+'</div><div class="sub">'+r[2]+'</div></div>',rating(r[3]),status(r[4]),'<span class="t-2">'+r[5]+'</span>','<span class="t-2">'+r[6]+'</span>',
+   r[7]==='review'?'<button class="btn tinted sm">Review</button>':r[7]==='mine'?'<span class="lock">'+ic('lock')+'You created this</span>':'<span class="lock">'+ic('chev-r')+'Open</span>'])}).join('')+'</div>',{count:3})));
+
+/* 03 New customer */
+function fv(l,v,cls,extra){return '<div class="field '+(cls||'')+'"><label>'+l+'</label><div class="v'+(v?'':' ph')+'">'+(v||'')+'</div>'+(extra||'')+'</div>'}
+function fx(l,pts,on){return '<div class="fx"><span class="grow'+(on?'':' t-3')+'">'+l+'</span><span class="pts'+(on?'':' t-3')+'">+'+pts+'</span></div>'}
+out.push(frame('03 / New customer',win('New customer',
+ '<div class="crumb">Review queue '+ic('chev-r','chev')+' New customer</div><div class="hd"><div class="grow"><div class="t-title1">New customer</div><div class="t-callout t-2">Screening and risk scoring run when you submit.</div></div></div>'+
+ '<div class="cols"><div class="col grow" style="flex:1">'+
+ '<div class="panel"><h3>Identity</h3><div class="grid3"><div style="grid-column:span 2">'+fv('Full name','Tomasz Kowalczyk-Brandstetter')+'</div>'+fv('Date of birth','12 Mar 2009','err','<div class="m">'+ic('alert')+'Customer must be 18 or older</div>')+'</div><div class="grid3">'+fv('Nationality','PL')+fv('Country of residence','GB')+fv('Occupation','Car dealer')+'</div></div>'+
+ '<div class="panel"><h3>ID document</h3><div class="grid3">'+fv('ID type','Passport')+fv('ID number','P9081726')+fv('Expiry','09 Mar 2026','err','<div class="m">'+ic('alert')+'This ID has expired</div>')+'</div>'+
+ '<div style="border:1.5px dashed var(--label-3);border-radius:var(--r-md);padding:18px;display:flex;align-items:center;gap:12px;color:var(--label-2)">'+ic('upload')+'<span class="t-sub">Drop a copy of the ID here, or <b style="color:var(--accent)">browse</b>. PDF, JPG or PNG up to 10 MB.</span></div></div>'+
+ '<div class="panel"><h3>Relationship</h3><div class="grid3">'+fv('Source of funds','Business income')+fv('Expected monthly volume (USD)','62,000')+fv('Met face to face','No, remote')+'</div></div></div>'+
+ '<div class="col" style="width:400px;flex:none"><div class="panel"><div style="display:flex;align-items:baseline;gap:8px"><h3 class="grow" style="flex:1">Risk preview</h3><span class="t-foot t-2">Updates as you type</span></div>'+
+ '<div style="display:flex;align-items:baseline;gap:10px"><span class="t-large mono">5</span>'+rating('Medium')+'</div>'+
+ '<div><div class="band"><i class="lo"></i><i class="md"></i><i class="hi"></i><i class="fillbar" style="width:41.6%;background:var(--warn)"></i></div><div class="band-l" style="margin-top:6px"><span style="width:25%">Low</span><span style="width:25%">Medium</span><span>High</span></div></div>'+
+ '<div>'+fx('High-risk nationality',0,0)+fx('PEP',0,0)+fx('Cash-intensive occupation',2,1)+fx('Monthly volume over 50,000',2,1)+fx('Source of funds other / unknown',0,0)+fx('Not met face to face',1,1)+'</div>'+
+ '<div class="callout info">'+ic('flag')+'<span>Medium needs a Senior Analyst to approve. Final rating is set when you submit.</span></div></div></div></div>'+
+ '<div style="margin-top:auto;display:flex;gap:12px;justify-content:flex-end"><button class="btn sec w">Cancel</button><button class="btn primary w" style="min-width:260px">Run checks and create case</button></div>')));
+
+/* 04/05 Case detail */
+function caseScreen(o){
+  var pct=Math.min(o.score/12,1)*100, col=o.rating==='High'?'var(--bad)':o.rating==='Medium'?'var(--warn)':'var(--good)';
+  var body=
+  '<div class="crumb">Review queue '+ic('chev-r','chev')+' '+o.id+'</div>'+
+  '<div class="hd">'+av(o.ini,'width:56px;height:56px;font-size:20px')+'<div class="grow"><div class="t-title1">'+o.name+'</div><div class="t-callout t-2">'+o.id+' &middot; Created by '+o.by+' on '+o.date+(o.pep?' &middot; Politically exposed':'')+'</div></div>'+rating(o.rating)+status(o.status)+'</div>'+
+  '<div class="cols"><div class="col" style="flex:1">'+
+  '<div class="panel"><div style="display:flex;align-items:baseline;gap:12px"><span class="t-large mono" style="font-size:52px;line-height:56px">'+o.score+'</span><span class="t-callout t-2">risk score</span><span style="flex:1"></span><span class="t-foot t-2">Next review due '+o.next+'</span></div>'+
+  '<div><div class="band"><i class="lo"></i><i class="md"></i><i class="hi"></i><i class="fillbar" style="width:'+pct+'%;background:'+col+'"></i></div><div class="band-l" style="margin-top:6px"><span style="width:25%">Low 0-2</span><span style="width:25%">Medium 3-5</span><span>High 6+</span></div></div>'+
+  '<div>'+o.factors.map(function(f){return '<div class="fx"><span class="grow">'+f[0]+'</span><span class="pts">+'+f[1]+'</span></div>'}).join('')+'</div></div>'+
+  '<div class="panel"><div style="display:flex;align-items:center"><h3 style="flex:1">Customer</h3>'+(o.reveal?'<span class="lock">'+ic('eye')+'Visible to Compliance &middot; view logged</span>':'<button class="btn tinted sm" disabled style="opacity:.6">'+ic('lock')+'Masked</button>')+'</div>'+
+  '<dl class="kv"><div><dt>Date of birth</dt><dd class="mask">'+o.dob+'</dd></div><div><dt>Nationality / residence</dt><dd>'+o.nat+'</dd></div><div><dt>Occupation</dt><dd>'+o.occ+'</dd></div>'+
+  '<div><dt>ID</dt><dd class="mask">'+o.idn+'</dd></div><div><dt>Source of funds</dt><dd>'+o.sof+'</dd></div><div><dt>Monthly volume</dt><dd class="mono">'+o.vol+'</dd></div></dl></div>'+
+  '<div class="panel"><h3>History</h3><div class="tl">'+o.hist.map(function(h){return '<div><span class="dot"></span><span>'+h[0]+'<small>'+h[1]+'</small></span></div>'}).join('')+'</div></div></div>'+
+  '<div class="col" style="width:400px;flex:none">'+
+  '<div class="panel"><h3>Screening</h3><div class="fx"><span class="grow">Sanctions list</span>'+chip('Clear','good')+'</div><div class="fx"><span class="grow">PEP list</span>'+(o.pep?chip('Match','bad'):chip('Clear','good'))+'</div><div class="sub">List refreshed today 06:00</div></div>'+
+  o.decision+'</div></div>';
+  return win('Review queue',body,{dark:o.dark,count:3}).replace('class="win"','class="win" style="height:1060px"').replace('class="win" data-theme','style="height:1060px" class="win" data-theme');
+}
+var dec1='<div class="panel"><h3>Decision</h3>'+
+ '<div class="callout warn">'+ic('alert')+'<span><b>High risk: enhanced due diligence</b>2 of 3 steps complete. Verify source of wealth to approve.</span></div>'+
+ '<div class="note-area">Decision note (required)</div>'+
+ '<button class="btn off" disabled>Approve</button><div class="why">'+ic('lock')+'<span>Approval unlocks when enhanced due diligence is complete.</span></div>'+
+ '<div style="display:flex;gap:10px"><button class="btn sec" style="flex:1">Escalate</button><button class="btn danger" style="flex:1">Reject</button></div></div>';
+var dec2='<div class="panel"><h3>Decision</h3>'+
+ '<div class="callout info">'+ic('user')+'<span><b>You can decide this case</b>Medium risk: Senior Analyst approval. You did not create it.</span></div>'+
+ '<div class="note-area err" style="color:var(--label-3)">Decision note (required)</div><div class="why" style="color:var(--bad);margin-top:-8px">'+ic('alert')+'<span>Add a decision note before you approve, reject or escalate.</span></div>'+
+ '<button class="btn primary">Approve</button>'+
+ '<div style="display:flex;gap:10px"><button class="btn sec" style="flex:1">Escalate</button><button class="btn danger" style="flex:1">Reject</button></div></div>';
+out.push(frame('04 / Case detail',caseScreen({id:'KYC-10003',name:'Elena Vasquez-Ruiz',ini:'EV',by:'senior1',date:'04 Feb 2025',pep:1,rating:'High',status:'Escalated',score:10,next:'04 Feb 2026 (1 year)',reveal:1,
+ factors:[['Politically exposed person',3],['High-risk nationality (VE)',3],['Source of funds: other',2],['Monthly volume over 10,000',1],['Not met face to face',1]],
+ dob:'23 Aug 1969',nat:'VE / ES',occ:'Government official',idn:'Passport P9081726',sof:'Other',vol:'$18,000',
+ hist:[['Escalated by senior1','04 Feb 2025, 16:02 &middot; "PEP, source of wealth unclear"'],['Screening run: PEP match','04 Feb 2025, 15:45'],['Case created','04 Feb 2025, 15:45 by senior1']],decision:dec1})));
+out.push(frame('05 / Case detail, dark, missing note',caseScreen({dark:1,id:'KYC-10002',name:'Marcus Oyelaran',ini:'MO',by:'analyst1',date:'03 Feb 2025',pep:0,rating:'Medium',status:'Pending review',score:5,next:'03 Feb 2027 (2 years)',reveal:0,
+ factors:[['Cash-intensive occupation: jewellery',2],['Monthly volume over 50,000',2],['Not met face to face',1]],
+ dob:'••/••/1975',nat:'NG / AE',occ:'Jewellery',idn:'••••••0934',sof:'Business income',vol:'$62,000',
+ hist:[['Screening run: clear','03 Feb 2025, 11:20'],['Case created','03 Feb 2025, 11:20 by analyst1']],decision:dec2}),'Hi-fi &middot; Dark'));
+
+/* 06 Screening */
+var sc='1.4fr 120px 110px 1fr';
+out.push(frame('06 / Name screening',win('Screening',
+ '<div><div class="t-title1">Name screening</div><div class="t-callout t-2">Check any name against sanctions and PEP lists. Every search is logged.</div></div>'+
+ '<div class="hd"><div class="field grow" style="flex:1"><label>Full name</label><div class="v">Elena Vasquez Ruiz</div></div><div class="field" style="width:220px"><label>Date of birth (optional)</label><div class="v ph">dd / mm / yyyy</div></div><button class="btn primary w" style="height:56px">'+ic('search')+'Screen</button></div>'+
+ '<div class="callout warn" style="align-items:center">'+ic('flag')+'<span><b style="display:inline">2 possible PEP matches.</b> No sanctions matches. Review the evidence before you decide.</span></div>'+
+ '<div class="tbl">'+th(sc,['Match','List','Strength','Details'])+
+ tr(sc,['<div><div style="font-weight:600">Elena Vasquez Ruiz</div><div class="sub">Born 1969 &middot; Venezuela</div></div>',chip('PEP','warn'),'<span class="mono" style="font-weight:600">92%</span>','<span class="t-2">Former deputy minister of finance, 2014-2019</span>'])+
+ tr(sc,['<div><div style="font-weight:600">E. Vasquez</div><div class="sub">Born 1974 &middot; Spain</div></div>',chip('PEP','warn'),'<span class="mono" style="font-weight:600">61%</span>','<span class="t-2">Municipal councillor, relative of PEP</span>'])+'</div>'+
+ '<div class="t-foot t-2" style="display:flex;gap:6px;align-items:center">'+ic('clock','')+'List from approved provider, refreshed today 06:00</div>')));
+
+/* 07 Reports */
+var rc='110px 1.4fr 110px 150px 150px 150px 140px';
+out.push(frame('07 / Reports',win('Reports',
+ '<div class="hd"><div class="grow"><div class="t-title1">Reports</div><div class="t-callout t-2">Cases by rating</div></div><button class="btn sec w">'+ic('down')+'Export CSV</button></div>'+
+ '<div class="hd"><div class="seg" style="width:360px"><span class="on">All</span><span>High</span><span>Medium</span><span>Low</span></div><button class="btn sec sm">Status: Any</button><button class="btn sec sm">Created: Last 90 days</button></div>'+
+ '<div class="callout info" style="align-items:center">'+ic('lock')+'<span>Dates of birth and ID numbers are masked here and in the export. Only Compliance can export unmasked data, and it is logged.</span></div>'+
+ '<div class="tbl">'+th(rc,['Case','Customer','Rating','Status','Next review','Created by','Decided by'])+
+ [['KYC-10003','Elena Vasquez-Ruiz','High','Escalated','Feb 2026','senior1','Pending'],['KYC-10002','Marcus Oyelaran','Medium','Pending review','Feb 2027','analyst1','Pending'],['KYC-10001','Priya Natarajan','Low','Approved','Feb 2028','analyst1','Automatic'],['KYC-10004','Dmitri Ivanov','High','Blocked','n/a','analyst2','Compliance'],['KYC-09987','Sofia Marchetti','Medium','Rejected','n/a','analyst1','senior1']].map(function(r){
+  return tr(rc,['<span class="id">'+r[0]+'</span>','<b style="font-weight:600">'+r[1]+'</b>',rating(r[2]),status(r[3]),'<span class="t-2">'+r[4]+'</span>','<span class="t-2">'+r[5]+'</span>','<span class="t-2">'+r[6]+'</span>'])}).join('')+'</div>')));
+
+/* 08 Queue states */
+var sk=function(w){return '<div class="sk" style="width:'+w+'"></div>'};
+out.push(frame('08 / Queue states','<div class="win" style="height:620px;padding:32px;gap:24px;background:var(--bg)">'+
+ '<div class="state-card"><div class="t-headline">Loading</div><div class="t-foot t-2">Layout is known, so skeleton rows, not a spinner.</div>'+
+ [1,2,3,4,5].map(function(){return '<div style="display:flex;gap:12px;align-items:center;padding:12px 0;border-top:.5px solid var(--sep)"><div class="sk" style="width:64px;height:20px"></div><div style="flex:1;display:flex;flex-direction:column;gap:8px">'+sk('70%')+sk('40%')+'</div><div class="sk" style="width:56px;height:22px;border-radius:99px"></div></div>'}).join('')+'</div>'+
+ '<div class="state-card" style="align-items:center;justify-content:center;text-align:center"><div class="empty-art">'+ic('check')+'</div><div class="t-title3">All clear</div><div class="t-callout t-2" style="max-width:280px">No cases are waiting for your decision. New ones appear here as analysts submit them.</div><button class="btn tinted sm">View all open cases</button></div>'+
+ '<div class="state-card" style="align-items:center;justify-content:center;text-align:center"><div class="empty-art" style="background:var(--bad-tint);color:var(--bad)">'+ic('alert')+'</div><div class="t-title3">The queue did not load</div><div class="t-callout t-2" style="max-width:280px">We could not reach the case service. Your work is saved. Try again in a moment.</div><button class="btn primary sm">'+ic('retry')+'Try again</button></div>'+
+ '</div>','Hi-fi &middot; States'));
+document.getElementById('board').innerHTML=out.join('');
+</script>
+</body></html>

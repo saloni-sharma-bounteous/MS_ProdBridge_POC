@@ -1,6 +1,6 @@
 ---
 name: java-spring-service
-description: Build production-grade Java services with Spring Boot 4 (Spring Framework 7, Java 21+, Spring Security 7, JPA with Flyway and PostgreSQL, Jackson 3, Testcontainers). Scaffolds a secure, tested, observable service from a validated data model and then implements the business rules from a spec with tests first. Use when asked to "create a Spring Boot service", "build the backend in Java", "write a REST API with Spring Boot 4", "turn this prototype's backend into a production service", "implement these business rules in Java", or after data-model-design and an implementation plan exist. Includes a Boot 4 baseline (what changed from Boot 3), a static production-readiness checker, and a parse-only Java syntax check.
+description: Build production-grade Java services on Spring Boot 4 (Java 21+, Spring Security 7, JPA, Flyway, PostgreSQL, Testcontainers). Scaffolds a secure, tested service from a validated data model, then implements spec business rules test-first. Use when asked to build a Spring Boot backend or REST API, or after data-model-design and implementation-plan.
 ---
 
 # Java Spring Boot 4 service

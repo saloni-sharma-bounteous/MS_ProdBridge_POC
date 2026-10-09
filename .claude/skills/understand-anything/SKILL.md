@@ -1,6 +1,6 @@
 ---
 name: understand-anything
-description: Turn an existing codebase (Java, TypeScript/JavaScript and React, HTML, SQL, Python) into a knowledge graph of files, classes, functions, endpoints, data stores and external services with typed, confidence-tagged links, communities, hubs, layers and guided tours, in the style of understand-anything and graphify. Use when someone says "map this codebase", "build a knowledge graph of the code", "what depends on X", "show me the architecture of this app", "what breaks if I change this", "explain this legacy code", or before writing a spec or a migration. Runs offline with no dependencies, never stores secret values, and produces graph.json, GRAPH_REPORT.md, a Mermaid overview, GraphML and an interactive HTML viewer.
+description: Turn an existing codebase (Java, TypeScript/JavaScript, React, HTML, SQL, Python) into an offline knowledge graph of files, classes, endpoints, data stores and services, with layers, hubs, tours, a report and an HTML viewer. Use when asked to "map this codebase", "what depends on X", "what breaks if I change this", or before a spec or migration.
 ---
 
 # Codebase graph
