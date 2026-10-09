@@ -1,6 +1,6 @@
 ---
 name: data-model-design
-description: Design a target data model from a spec: entities, keys, constraints, enums, data classification and retention, then generate PostgreSQL DDL, an ER diagram and a migration plan. Use when asked to "design the schema", "turn this spec into tables", or before writing a backend service.
+description: Design a target data model from a spec - entities, keys, constraints, enums, data classification and retention, then generate PostgreSQL DDL, an ER diagram and a migration plan. Use when asked to "design the schema", "turn this spec into tables", or before writing a backend service.
 ---
 
 # Data model design
