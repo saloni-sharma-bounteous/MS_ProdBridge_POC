@@ -1,0 +1,57 @@
+# Plan on pull requests, apply on merge to main behind an environment approval.
+# Authentication uses GitHub OIDC (no stored AWS keys). Create the IAM role first,
+# trust token.actions.githubusercontent.com for this repo, and set the secret
+# AWS_ROLE_ARN. Check the action versions below are current before use.
+name: terraform
+on:
+  pull_request:
+    paths: ["**.tf", "envs/**", ".github/workflows/terraform.yml"]
+  push:
+    branches: [main]
+    paths: ["**.tf", "envs/**"]
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+env:
+  TF_IN_AUTOMATION: "true"
+  TF_ENV: dev   # change per environment, or use a matrix
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+      - run: terraform fmt -check -recursive
+      - run: terraform init -input=false -backend-config=envs/${TF_ENV}.backend.hcl
+      - run: terraform validate
+      - run: terraform plan -input=false -var-file=envs/${TF_ENV}.tfvars -out=tfplan
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tfplan
+          path: tfplan
+
+  apply:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: plan
+    runs-on: ubuntu-latest
+    environment: dev   # protect this environment with required reviewers in repo settings
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+      - uses: actions/download-artifact@v4
+        with:
+          name: tfplan
+      - run: terraform init -input=false -backend-config=envs/${TF_ENV}.backend.hcl
+      - run: terraform apply -input=false tfplan

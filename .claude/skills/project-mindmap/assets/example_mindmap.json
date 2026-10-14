@@ -24,27 +24,27 @@
     },
     {
       "name": "Agent skills",
-      "summary": "Claude Code skills that automate the work.",
+      "summary": "Agent skills that automate the work.",
       "children": [
         {
           "id": "orch",
           "name": "Orchestrator",
           "role": "Tests the live app",
-          "path": ".claude/skills",
+          "path": "skills",
           "detail": "Opens the app URL in a browser and exercises each skill, recording what passes and what fails."
         },
         {
           "id": "jirask",
           "name": "create-jira-stories",
           "role": "Backlog to Jira",
-          "path": ".claude/skills/create-jira-stories",
+          "path": "skills/create-jira-stories",
           "detail": "Skill wrapper that runs jira_import.py to turn the findings file into Jira work."
         },
         {
           "id": "mm",
           "name": "project-mindmap",
           "role": "Draws this map",
-          "path": ".claude/skills/project-mindmap",
+          "path": "skills/project-mindmap",
           "detail": "Reads the project, writes mindmap.json, builds the HTML and screenshots it with Playwright."
         }
       ]
@@ -57,7 +57,7 @@
           "id": "imp",
           "name": "jira_import.py",
           "role": "Creates issues",
-          "path": ".claude/skills/create-jira-stories/scripts/jira_import.py",
+          "path": "skills/create-jira-stories/scripts/jira_import.py",
           "detail": "Reads the backlog file and calls the Jira REST API to create the project, epics, stories, dependency links, a filter and a Scrum board. Re-runs skip anything already created."
         },
         {

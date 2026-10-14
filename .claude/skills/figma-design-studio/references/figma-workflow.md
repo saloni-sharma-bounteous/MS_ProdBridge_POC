@@ -10,7 +10,7 @@
 
 ## 1. Pick the route
 
-Look at your tool list. Tool names may carry a prefix such as `mcp__figma__`.
+Look at your tool list. Tool names may carry a client-specific prefix (for example `mcp__figma__` or `figma/`); match on the tool name.
 
 | You have | Route |
 |---|---|
@@ -109,8 +109,7 @@ Replace the accent values (and tints) with the product's chosen accent, and keep
 
 Tell the user, only if the tools are missing:
 
-- With the Claude Code CLI: `claude mcp add --transport http figma https://mcp.figma.com/mcp`, then run `/mcp` and authenticate with Figma.
-- Without the CLI, add a `.mcp.json` file in the project folder:
+- Add the Figma MCP server (`https://mcp.figma.com/mcp`, HTTP transport) to your client's MCP configuration, then authenticate with Figma when prompted. See `PORTABILITY.md` in the skills folder for where each client keeps MCP config. Example of the common JSON shape (key names vary slightly by client):
 
 ```json
 {
@@ -120,5 +119,5 @@ Tell the user, only if the tools are missing:
 }
 ```
 
-  Restart Claude Code, then authenticate Figma from `/mcp`.
+  Restart or reload the client, then authenticate Figma.
 - The user needs a Figma account with a **Full seat** to let the agent write to a file.

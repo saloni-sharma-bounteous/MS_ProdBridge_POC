@@ -80,17 +80,17 @@ Copy `assets/design-system.css` and `assets/icons-sprite.html` content into the 
 
 ### 5. Critique loop (required)
 
-1. Serve the `design/` folder (`python -m http.server 8765` from inside it) and use the **Playwright MCP**: `browser_resize` to 1700 x 1000, `browser_navigate` to the board, `browser_take_screenshot` with `fullPage: true` into `lofi/lofi.png` and `hifi/hifi.png`.
+1. Serve the `design/` folder (`python -m http.server 8765` from inside it) and use any headless-browser capability (browser tool, Playwright CLI or headless Chrome): viewport 1700 x 1000, open the board, take a full-page screenshot into `lofi/lofi.png` and `hifi/hifi.png`.
 2. Look at the images. Go through the **review checklist** in `references/design-principles.md` and list the 5 weakest things honestly.
 3. Fix them, rebuild, re-screenshot. Do at most 2 passes. Stop the server afterwards.
 
-If the Playwright MCP is unavailable, say so and skip the PNGs. Do not claim you reviewed images you did not see.
+If no browser capability is available, say so and skip the PNGs. Do not claim you reviewed images you did not see.
 
 ### 6. Deliver to Figma
 
 Follow `references/figma-workflow.md`. In short:
 
-- **Figma MCP connected** (tools like `use_figma`, `generate_figma_design`): ask for the Figma file URL if you do not have one, then build native, auto-layout Figma frames, variables and components.
+- **Figma MCP connected** (tools like `use_figma`, `generate_figma_design`; names may carry a client-specific prefix): ask for the Figma file URL if you do not have one, then build native, auto-layout Figma frames, variables and components.
 - **Not connected**: tell the user plainly and give them the one-line way to connect it. Deliver the boards, PNGs and `tokens.json`, plus the import steps.
 
 Never pretend something was created in Figma if it was not.
@@ -106,3 +106,12 @@ Reply with: where the files are, the 3 design decisions you are proudest of and 
 - Consistent 4/8 pt spacing, one radius family, one type scale.
 - Do not copy Apple's trademarks, logos, SF Symbols artwork, or proprietary fonts into files. Use the bundled icons and the font stack.
 - Do not clone an existing product's design. Take inspiration from principles, not pixels.
+
+## Self-learning
+
+At the end of every run, reflect on what went wrong or was slow, what the user corrected, and what was missing or unclear in this skill. If you find a concrete improvement, do not edit this skill on your own. Instead:
+
+1. Propose it as a short list. For each item give the section affected, the exact change, and the reason (what it prevents next run).
+2. Ask the user to approve, edit, or reject each item.
+3. Apply only the approved items to this `SKILL.md` (or its scripts, templates or references), keeping edits small. Tell the user what changed.
+4. If nothing needs changing, say so in one line. Never record secrets, personal data or one-off project details as lessons.

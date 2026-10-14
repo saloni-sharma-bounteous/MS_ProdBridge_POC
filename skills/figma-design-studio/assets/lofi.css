@@ -1,0 +1,42 @@
+/* ============================================================
+   Lo-fi wireframe kit. Grayscale only, one annotation colour.
+   Purpose: structure, hierarchy and flow, never styling.
+   Use the same device size as hi-fi (393 x 852) so layouts carry over.
+   ============================================================ */
+:root{--wf-ink:#2b2d33;--wf-line:#9a9ca5;--wf-soft:#d9dadf;--wf-fill:#eeeef1;--wf-bg:#fff;--wf-note:#e0731a;--wf-font:"Inter","Segoe UI",system-ui,sans-serif}
+
+.wf-board{padding:64px;display:flex;gap:72px;flex-wrap:wrap;justify-content:center;align-items:flex-start;background:#f4f4f6;font-family:var(--wf-font);color:var(--wf-ink)}
+.wf-frame{display:flex;flex-direction:column;gap:16px;align-items:flex-start}
+.wf-label{font-size:15px;font-weight:600}.wf-label span{color:#80838c;font-weight:500;margin-left:8px}
+.wf-device{width:393px;height:852px;background:var(--wf-bg);border:2px solid var(--wf-ink);border-radius:44px;overflow:hidden;position:relative;display:flex;flex-direction:column;padding:56px 20px 20px;gap:14px;box-sizing:border-box;flex:none}
+.wf-device *{box-sizing:border-box}
+.wf-device::before{content:"9:41";position:absolute;top:18px;left:34px;font-size:14px;font-weight:600;color:var(--wf-line)}
+
+.wf-title{font-size:30px;font-weight:700;line-height:1.15}
+.wf-h{font-size:17px;font-weight:600}
+.wf-p{font-size:14px;color:#5b5e68}
+.wf-box{border:1.5px solid var(--wf-line);border-radius:10px;padding:12px;background:var(--wf-bg)}
+.wf-fill{background:var(--wf-fill);border-color:transparent}
+.wf-row{display:flex;align-items:center;gap:12px}.wf-grow{flex:1;min-width:0}
+.wf-gap{display:flex;flex-direction:column;gap:12px}
+.wf-line{height:9px;border-radius:5px;background:var(--wf-soft)}.wf-line.s{width:55%}.wf-line.m{width:75%}.wf-line.dark{background:var(--wf-line)}
+.wf-circle{width:40px;height:40px;border-radius:50%;background:var(--wf-soft);flex:none}
+.wf-icon{width:26px;height:26px;border-radius:7px;border:1.5px solid var(--wf-line);flex:none}
+.wf-img{background:linear-gradient(to top right,transparent calc(50% - 1px),var(--wf-line) 50%,transparent calc(50% + 1px)),linear-gradient(to bottom right,transparent calc(50% - 1px),var(--wf-line) 50%,transparent calc(50% + 1px));border:1.5px solid var(--wf-line);border-radius:10px;min-height:120px}
+.wf-btn{height:48px;border-radius:12px;border:1.5px solid var(--wf-ink);display:grid;place-items:center;font-weight:600;font-size:16px}
+.wf-btn.fill{background:var(--wf-ink);color:#fff}
+.wf-input{height:44px;border:1.5px solid var(--wf-line);border-radius:10px;padding:0 12px;display:flex;align-items:center;color:#80838c;font-size:15px}
+.wf-chip{display:inline-block;border:1.5px solid var(--wf-line);border-radius:99px;padding:2px 10px;font-size:12px;color:#5b5e68}
+.wf-seg{display:flex;border:1.5px solid var(--wf-line);border-radius:9px;overflow:hidden;font-size:13px}
+.wf-seg span{flex:1;text-align:center;padding:6px 0}.wf-seg .on{background:var(--wf-ink);color:#fff}
+.wf-tabs{margin-top:auto;border-top:1.5px solid var(--wf-line);padding-top:12px;display:flex;justify-content:space-around;font-size:11px;color:#5b5e68}
+.wf-tabs div{display:flex;flex-direction:column;align-items:center;gap:4px}.wf-tabs .on{color:var(--wf-ink);font-weight:700}
+.wf-bottom{margin-top:auto;display:flex;gap:10px}
+
+/* Annotations: numbered pins on the screen, matching notes beside it */
+.wf-pin{position:absolute;right:12px;width:24px;height:24px;border-radius:50%;background:var(--wf-note);color:#fff;font-size:13px;font-weight:700;display:grid;place-items:center;z-index:4}
+.wf-notes{width:300px;display:flex;flex-direction:column;gap:12px;padding-top:44px}
+.wf-note{display:flex;gap:10px;font-size:14px;line-height:1.4}
+.wf-note b{flex:none;width:22px;height:22px;border-radius:50%;background:var(--wf-note);color:#fff;font-size:12px;display:grid;place-items:center}
+.wf-note-title{font-size:13px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#80838c}
+.wf-flow{display:flex;align-items:center;font-size:20px;color:var(--wf-line)}

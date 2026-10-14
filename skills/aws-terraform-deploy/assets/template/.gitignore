@@ -1,0 +1,12 @@
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+.plans/
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+secrets.auto.tfvars
+.env
+# Commit .terraform.lock.hcl so provider versions stay pinned.

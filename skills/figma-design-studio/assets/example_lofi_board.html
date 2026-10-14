@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lo-fi example board</title><link rel="stylesheet" href="lofi.css"></head>
+<body style="margin:0">
+<div class="wf-board" data-figma-name="Lo-fi / KYC review">
+
+  <!-- Screen 1 + notes -->
+  <div class="wf-frame" data-figma-name="01 / Review queue">
+    <div class="wf-label">01 / Review queue<span>Lo-fi</span></div>
+    <div style="display:flex;gap:28px;align-items:flex-start">
+      <div class="wf-device">
+        <div class="wf-row"><div class="wf-grow"><div class="wf-title">Queue</div><div class="wf-p">5 applications need a decision</div></div><div class="wf-circle" style="width:34px;height:34px"></div></div>
+        <div class="wf-input">Search applicants</div>
+        <div class="wf-row">
+          <div class="wf-box wf-fill wf-grow"><div class="wf-p">Pending</div><div class="wf-title">12</div></div>
+          <div class="wf-box wf-fill wf-grow"><div class="wf-p">High risk</div><div class="wf-title">3</div></div>
+        </div>
+        <div class="wf-seg"><span class="on">All</span><span>Pending</span><span>Escalated</span></div>
+        <div class="wf-box wf-gap" style="padding:4px 12px">
+          <div class="wf-row" style="padding:8px 0"><div class="wf-circle"></div><div class="wf-grow wf-gap" style="gap:7px"><div class="wf-line dark m"></div><div class="wf-line s"></div></div><span class="wf-chip">Low</span></div>
+          <div class="wf-row" style="padding:8px 0"><div class="wf-circle"></div><div class="wf-grow wf-gap" style="gap:7px"><div class="wf-line dark m"></div><div class="wf-line s"></div></div><span class="wf-chip">High</span></div>
+          <div class="wf-row" style="padding:8px 0"><div class="wf-circle"></div><div class="wf-grow wf-gap" style="gap:7px"><div class="wf-line dark m"></div><div class="wf-line s"></div></div><span class="wf-chip">Low</span></div>
+          <div class="wf-row" style="padding:8px 0"><div class="wf-circle"></div><div class="wf-grow wf-gap" style="gap:7px"><div class="wf-line dark m"></div><div class="wf-line s"></div></div><span class="wf-chip">Medium</span></div>
+        </div>
+        <div class="wf-tabs"><div class="on"><span class="wf-icon"></span>Queue</div><div><span class="wf-icon"></span>New</div><div><span class="wf-icon"></span>Reports</div><div><span class="wf-icon"></span>Settings</div></div>
+        <div class="wf-pin" style="top:122px">1</div><div class="wf-pin" style="top:196px">2</div><div class="wf-pin" style="top:300px">3</div>
+      </div>
+      <div class="wf-notes">
+        <div class="wf-note-title">Notes</div>
+        <div class="wf-note"><b>1</b><span>Search is always visible. Filters narrow the list as the analyst types.</span></div>
+        <div class="wf-note"><b>2</b><span>Two summary tiles answer "what needs me first?" before the list does.</span></div>
+        <div class="wf-note"><b>3</b><span>Each row opens the case. Risk is shown as a label, never colour alone.</span></div>
+        <div class="wf-note-title" style="margin-top:12px">States to design</div>
+        <div class="wf-note"><span>Empty queue, loading, offline, filter with no results.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wf-flow" style="align-self:center">&rarr;</div>
+
+  <!-- Screen 2 -->
+  <div class="wf-frame" data-figma-name="02 / Case detail">
+    <div class="wf-label">02 / Case detail<span>Lo-fi</span></div>
+    <div class="wf-device">
+      <div class="wf-row"><span class="wf-p">&lsaquo; Queue</span><div class="wf-grow" style="text-align:center" ><span class="wf-h">Case #3</span></div><span class="wf-p">&middot;&middot;&middot;</span></div>
+      <div class="wf-box wf-fill" style="text-align:center"><div class="wf-circle" style="width:60px;height:60px;margin:0 auto 10px"></div><div class="wf-h">Lena Hoffmann</div><div class="wf-p">Germany &middot; National ID</div><span class="wf-chip" style="margin-top:8px">Escalation required</span></div>
+      <div class="wf-box"><div class="wf-row"><span class="wf-h wf-grow">Risk score</span><span class="wf-title" style="font-size:24px">55</span></div><div class="wf-line dark" style="margin:10px 0 8px;height:8px"></div><div class="wf-line m"></div></div>
+      <div class="wf-box wf-gap" style="gap:14px">
+        <div class="wf-row"><span class="wf-icon"></span><span class="wf-grow">Photo ID</span><span>&#10003;</span></div>
+        <div class="wf-row"><span class="wf-icon"></span><span class="wf-grow">Proof of address</span><span>&#10003;</span></div>
+        <div class="wf-row"><span class="wf-icon"></span><span class="wf-grow">Source of funds</span><span>&#9675;</span></div>
+        <div class="wf-row"><span class="wf-icon"></span><span class="wf-grow">Sanctions screening</span><span class="wf-chip">Clear</span></div>
+      </div>
+      <div class="wf-bottom"><div class="wf-btn wf-grow">Escalate</div><div class="wf-btn fill wf-grow">Approve</div></div>
+    </div>
+  </div>
+</div>
+</body></html>

@@ -1,0 +1,21 @@
+{
+  "name": "prodbridge-agents",
+  "version": "0.1.0",
+  "description": "POC-to-production agent skills and orchestrator for Claude Code, OpenAI Codex and GitHub Copilot. One source, installed per tool with npx.",
+  "bin": {
+    "prodbridge-agents": "bin/cli.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "skills",
+    "agents",
+    "prompts",
+    "mcp"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED",
+  "keywords": ["claude-code", "codex", "copilot", "agent-skills", "poc-to-production"]
+}

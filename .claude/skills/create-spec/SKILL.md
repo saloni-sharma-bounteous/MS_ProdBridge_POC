@@ -64,3 +64,12 @@ Ask the business owner to confirm Sections 3-4 and answer the open questions, an
 ## Output
 
 `<handoff>/spec.md`
+
+## Self-learning
+
+At the end of every run, reflect on what went wrong or was slow, what the user corrected, and what was missing or unclear in this skill. If you find a concrete improvement, do not edit this skill on your own. Instead:
+
+1. Propose it as a short list. For each item give the section affected, the exact change, and the reason (what it prevents next run).
+2. Ask the user to approve, edit, or reject each item.
+3. Apply only the approved items to this `SKILL.md` (or its scripts, templates or references), keeping edits small. Tell the user what changed.
+4. If nothing needs changing, say so in one line. Never record secrets, personal data or one-off project details as lessons.

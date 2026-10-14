@@ -14,3 +14,13 @@ __pycache__/
 node_modules/
 .DS_Store
 Thumbs.db
+
+# Installer output for other tools (regenerate with: node bin/cli.js init)
+AGENTS.md
+.agents/
+.codex/
+.github/skills/
+.github/agents/
+.github/prompts/
+.github/copilot-instructions.md
+.vscode/mcp.json

@@ -1,0 +1,117 @@
+{
+  "title": "MS_POC",
+  "summary": "A KYC onboarding web app that an agent tests, turning findings into Jira stories.",
+  "branches": [
+    {
+      "name": "App under test",
+      "summary": "A browser app the agent drives to check every skill.",
+      "children": [
+        {
+          "id": "app",
+          "name": "kyc_app.py",
+          "role": "KYC review desk",
+          "path": "kyc_app.py",
+          "detail": "Standard-library web server on port 8000. Analysts log in, create applications, verify documents, run sanctions screening, then approve, escalate or reject."
+        },
+        {
+          "id": "rules",
+          "name": "Decision rules",
+          "role": "Approval checks",
+          "path": "kyc_app.py",
+          "detail": "Approval needs all documents verified and a clear screening result. High-risk cases must be escalated first. Sanctions hits can never be approved."
+        }
+      ]
+    },
+    {
+      "name": "Agent skills",
+      "summary": "Agent skills that automate the work.",
+      "children": [
+        {
+          "id": "orch",
+          "name": "Orchestrator",
+          "role": "Tests the live app",
+          "path": "skills",
+          "detail": "Opens the app URL in a browser and exercises each skill, recording what passes and what fails."
+        },
+        {
+          "id": "jirask",
+          "name": "create-jira-stories",
+          "role": "Backlog to Jira",
+          "path": "skills/create-jira-stories",
+          "detail": "Skill wrapper that runs jira_import.py to turn the findings file into Jira work."
+        },
+        {
+          "id": "mm",
+          "name": "project-mindmap",
+          "role": "Draws this map",
+          "path": "skills/project-mindmap",
+          "detail": "Reads the project, writes mindmap.json, builds the HTML and screenshots it with Playwright."
+        }
+      ]
+    },
+    {
+      "name": "Jira integration",
+      "summary": "Creates the board, epics and stories in Jira Cloud.",
+      "children": [
+        {
+          "id": "imp",
+          "name": "jira_import.py",
+          "role": "Creates issues",
+          "path": "skills/create-jira-stories/scripts/jira_import.py",
+          "detail": "Reads the backlog file and calls the Jira REST API to create the project, epics, stories, dependency links, a filter and a Scrum board. Re-runs skip anything already created."
+        },
+        {
+          "id": "jira",
+          "name": "Jira Cloud",
+          "role": "Board and stories",
+          "path": "yoursite.atlassian.net",
+          "detail": "Receives the issues and shows them on a Scrum board."
+        }
+      ]
+    },
+    {
+      "name": "Data and config",
+      "summary": "Files the other parts read and write.",
+      "children": [
+        {
+          "id": "stories",
+          "name": "stories.json",
+          "role": "Epics and stories",
+          "path": "handoff/stories.json",
+          "detail": "The backlog: epics, stories, priorities, acceptance criteria and dependencies."
+        },
+        {
+          "id": "env",
+          "name": ".env",
+          "role": "Jira credentials",
+          "path": ".env",
+          "detail": "Holds JIRA_BASE_URL, JIRA_EMAIL and JIRA_API_TOKEN. Never commit it."
+        },
+        {
+          "id": "state",
+          "name": "import state",
+          "role": "Resume support",
+          "path": "handoff/jira_import_state.json",
+          "detail": "Maps backlog ids to Jira keys so a failed import can resume."
+        }
+      ]
+    }
+  ],
+  "links": [
+    { "from": "orch", "to": "app", "label": "tests in browser" },
+    { "from": "orch", "to": "stories", "label": "writes findings" },
+    { "from": "app", "to": "rules", "label": "enforces" },
+    { "from": "jirask", "to": "imp", "label": "runs" },
+    { "from": "imp", "to": "stories", "label": "reads" },
+    { "from": "imp", "to": "env", "label": "loads secrets" },
+    { "from": "imp", "to": "jira", "label": "REST calls" },
+    { "from": "imp", "to": "state", "label": "saves progress" }
+  ],
+  "flow": [
+    "The orchestrator opens the KYC app URL and exercises each skill.",
+    "Findings are written to stories.json as epics and stories.",
+    "jira_import.py loads credentials from .env and checks them against Jira.",
+    "It creates the project, epics, stories and dependency links, then a Scrum board.",
+    "Progress is saved to the state file so a re-run only does what is missing."
+  ]
+}
